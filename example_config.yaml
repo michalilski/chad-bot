@@ -1,0 +1,5 @@
+utterance_handler: chatgpt_based
+
+OpenAI:
+  api_key: this-is-api-key-from-open-ai
+  organization: org-hash # optional

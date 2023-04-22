@@ -1,0 +1,2 @@
+class UtteranceHandlerException(Exception):
+    pass
