@@ -1,0 +1,2 @@
+class ChatGPTResponseParsingError(Exception):
+    pass

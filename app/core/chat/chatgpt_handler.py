@@ -1,6 +1,6 @@
 import openai
 
-from app.env import config
+from app.settings import config
 
 
 class ChatGPTHandler:

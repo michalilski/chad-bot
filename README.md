@@ -4,13 +4,12 @@
 
 1. Environment installation
 ```bash
-TODO
+pip install -r requirements.txt
 ```
+
+2. Create a `config.yaml` file similar to `example_config.yaml`
 
 2. Server start
 ```bash
-uvicorn app.main:app --reload
+gradio app/main.py
 ```
-Additional parameters
-- `--host`, e.g. `0.0.0.0` (to expose in local network)
-- `--port`, e.g `8000` (default)
