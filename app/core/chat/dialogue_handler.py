@@ -3,6 +3,8 @@ from typing import List
 from app.core.chat.dst_module import AbstractDSTModule
 from app.core.chat.intent_detection import AbstractIntentDetectionModule
 from app.core.chat.response_generation import AbstractResponseGenerationModule
+from app.core.enums import IntentEnum
+from app.core.schemas.state import AbstractState, intent_state_mapping
 
 
 class DialogueHandler:
@@ -18,4 +20,6 @@ class DialogueHandler:
 
     def answer(self, chat_history: List[str], message: str) -> str:
         # TODO implement submodules and combine here
-        return f"Empty template answer {len(chat_history)}"
+        intent: IntentEnum = self.id_module.recognize_intent(message)
+        state: AbstractState = self.dst_module.parse_state_params(message, intent_state_mapping[intent])
+        return f"intent: {intent}, state: {state}"

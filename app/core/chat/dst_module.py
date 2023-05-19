@@ -4,14 +4,14 @@ from abc import abstractmethod
 from typing import Any, Dict, Type
 
 from app.core.chat.chatgpt_handler import ChatGPTHandler
-from app.core.schemas.state import AbstractStateQuery
+from app.core.schemas.state import AbstractState
 from app.exceptions import ChatGPTResponseParsingError
 
 
 class AbstractDSTModule:
     @abstractmethod
-    def parse_query_params(self, text: str, StateQueryClass: Type[AbstractStateQuery]) -> AbstractStateQuery:
-        """Parse user's utterance to structrized query parameters"""
+    def parse_state_params(self, text: str, AbstractStateClass: Type[AbstractState]) -> AbstractState:
+        """Parse user's utterance to structrized state parameters"""
         pass
 
 
@@ -25,25 +25,23 @@ class ChatGPTBasedDSTModule(AbstractDSTModule):
     def __init__(self, chatgpt_handler: ChatGPTHandler):
         self.chatgpt_handler = chatgpt_handler
 
-    def parse_query_params(self, text: str, StateQueryClass: Type[AbstractStateQuery]) -> AbstractStateQuery:
-        model_query: str = self.dst_prompt.format(*[self.extract_fields_from_query_class(StateQueryClass), text])
+    def parse_state_params(self, text: str, AbstractStateClass: Type[AbstractState]) -> AbstractState:
+        model_query: str = self.dst_prompt.format(self.extract_fields_from_state_class(AbstractStateClass), text)
         model_response: str = self.chatgpt_handler.request(model_query)
         processed_response: Dict[str, Any] = ChatGPTResponseProcessor.process(model_response)
-        return self.dict_to_query_params(processed_response, StateQueryClass)
+        return self.dict_to_state_params(processed_response, AbstractStateClass)
 
-    def extract_fields_from_query_class(self, StateQueryClass: Type[AbstractStateQuery]) -> str:
-        return ", ".join([field.name for field in dataclasses.fields(StateQueryClass)])
+    def extract_fields_from_state_class(self, AbstractStateClass: Type[AbstractState]) -> str:
+        return ", ".join([field.name for field in dataclasses.fields(AbstractStateClass)])
 
-    def dict_to_query_params(
-        self, response: Dict[str, Any], StateQueryClass: Type[AbstractStateQuery]
-    ) -> AbstractStateQuery:
+    def dict_to_state_params(self, response: Dict[str, Any], AbstractStateClass: Type[AbstractState]) -> AbstractState:
         try:
-            query: AbstractStateQuery = StateQueryClass(**response)
+            state: AbstractState = AbstractStateClass(**response)
         except TypeError as err:
             raise ChatGPTResponseParsingError(
-                f"Could not parse the response {response} to {StateQueryClass.__name__} params. -> {err}"
+                f"Could not parse the response {response} to {AbstractStateClass.__name__} params. -> {err}"
             )
-        return query
+        return state
 
 
 class ChatGPTResponseProcessor:
