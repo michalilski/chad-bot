@@ -48,8 +48,7 @@ class ChatGPTResponseProcessor:
     @classmethod
     def process(cls, text: str):
         text = cls.remove_special_characters(text)
-        data: Dict[str, Any] = cls.parse_to_dictionary(text)
-        return cls.multiple_values_to_list(data)
+        return cls.parse_to_dictionary(text)
 
     @classmethod
     def remove_special_characters(cls, text: str) -> str:
@@ -61,11 +60,4 @@ class ChatGPTResponseProcessor:
             data: Dict[str, Any] = json.loads(text)
         except json.JSONDecodeError:
             raise ChatGPTResponseParsingError(f"Could not parse text: {text} to dictionary type.")
-        return data
-
-    @classmethod
-    def multiple_values_to_list(cls, data: Dict[str, Any]):
-        for key, values in data.items():
-            if type(values) is str:
-                data[key] = values.split(", ")
         return data
