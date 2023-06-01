@@ -6,5 +6,7 @@ from app.core.chat.response_generation import ChatGPTBasedResponseGenerationModu
 
 chatgpt_handler: ChatGPTHandler = ChatGPTHandler()
 chatgpt_based_dialogue_handler: DialogueHandler = DialogueHandler(
-    ChatGPTBasedDSTModule(chatgpt_handler), ChatGPTBasedIntentDetectionModule(), ChatGPTBasedResponseGenerationModule()
+    ChatGPTBasedDSTModule(chatgpt_handler),
+    ChatGPTBasedIntentDetectionModule(chatgpt_handler),
+    ChatGPTBasedResponseGenerationModule(chatgpt_handler),
 )
