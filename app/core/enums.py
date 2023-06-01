@@ -7,3 +7,4 @@ class IntentEnum(str, Enum):
     MOVIE_SUMMARY = "describe the movie"
     CANCEL_INTENT = "cancel current procedure"
     CANCEL_RESERVATION = "cancel reservation for the show"
+    UNKNOWN = "unknown intent"
