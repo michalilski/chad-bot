@@ -1,20 +1,24 @@
-version: '3.11'
-services:
+version: '3.9'
 
+services:
   chadbot-app:
     build: ./
     container_name: chadbot-app
     ports:
       - 7860:7860
+    volumes:
+      - ./:/chad-bot
     links:
+      - chadbot-db
+    depends_on:
       - chadbot-db
 
   chadbot-db:
-    image: mariadb:10.7
-    ports:
-      - 3306:3306
+    image: mysql:5.7
+    container_name: chadbot-db
     volumes:
-      - ${PWD}/mariadb:/var/lib/mysql
+      - ./mysql:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=chad-boys
-
+      MYSQL_ROOT_PASSWORD: chadboys
+      MYSQL_DATABASE: cinema
+  

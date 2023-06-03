@@ -5,6 +5,7 @@ from app.core.chat.dst.dst_module import AbstractDSTModule
 from app.core.chat.dst.intent_detection import AbstractIntentDetectionModule
 from app.core.chat.dst.state_handler import StateHandler
 from app.core.chat.nlg.response_generation import AbstractResponseGenerationModule
+from app.core.db.engine import db_session
 from app.core.enums import IntentEnum
 from app.core.schemas.dialogue_action import AbstractDialogueAction
 from app.core.schemas.state import AbstractState, intent_state_mapping

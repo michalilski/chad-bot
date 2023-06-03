@@ -162,4 +162,4 @@ cython_debug/
 .python-version
 config.yaml
 
-/mariadb
+/mysql
