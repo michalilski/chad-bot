@@ -9,17 +9,17 @@ Base: Type = declarative_base()
 
 class Movie(Base):
     __tablename__ = "movies"
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    imdb_id = sqlalchemy.Column(sqlalchemy.String(length=20), primary_key=True)
+    title = sqlalchemy.Column(sqlalchemy.String(length=100))
     director = sqlalchemy.Column(sqlalchemy.String(length=50))
     year = sqlalchemy.Column(sqlalchemy.Integer)
     genre = sqlalchemy.Column(sqlalchemy.String(length=50))
-    summary = sqlalchemy.Column(sqlalchemy.Text)
 
 
 class Show(Base):
     __tablename__ = "movie_shows"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-    movie_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey(Movie.id))
+    movie_id = sqlalchemy.Column(sqlalchemy.String(length=20), sqlalchemy.ForeignKey(Movie.imdb_id))
     show_time = sqlalchemy.Column(sqlalchemy.DateTime)
 
     movie = relationship("Movie", foreign_keys="Show.movie_id")
