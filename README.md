@@ -1,4 +1,4 @@
-# UniChat project prototype
+# Chad-Bot project prototype
 
 ### This repository contains a chatbot middle layer prototype.
 
