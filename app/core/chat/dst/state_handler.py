@@ -1,6 +1,6 @@
 from collections import defaultdict
 from dataclasses import fields
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 from app.core.enums import IntentEnum
 from app.core.schemas.state import AbstractState, intent_state_mapping
@@ -13,7 +13,7 @@ class StateHandler:
         }
         self.general_state: Dict[str, Any] = defaultdict(lambda _: None)
 
-    def update(self, intent: IntentEnum, state: AbstractState):
+    def update(self, intent: IntentEnum, state: AbstractState) -> Tuple[AbstractState, Dict[str, Any]]:
         previous_state: AbstractState = self.states[intent]
         for field in fields(state):
             if field.name == "required":
@@ -27,6 +27,7 @@ class StateHandler:
 
             self.states[intent].__setattr__(field.name, current_value)
             self.general_state[field.name] = current_value
+        return self.states[intent], self.general_state
 
     def should_update(self, previous: Any, current: Any) -> bool:
         return previous is None or current is not None

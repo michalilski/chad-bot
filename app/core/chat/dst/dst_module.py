@@ -2,7 +2,7 @@ import dataclasses
 import json
 import logging
 from abc import abstractmethod
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Type
 
 from app.core.chat.chatgpt_handler import ChatGPTHandler
 from app.core.schemas.state import AbstractState
