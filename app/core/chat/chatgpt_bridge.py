@@ -6,7 +6,7 @@ from app.exceptions import ChatGPTConnectionError, ChatProcessingException
 from app.settings import config
 
 
-class ChatGPTHandler:
+class ChatGPTBridge:
     def __init__(self):
         openai.api_key = config["OpenAI"]["api_key"]
 

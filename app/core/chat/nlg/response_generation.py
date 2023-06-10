@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from app.core.chat.chatgpt_handler import ChatGPTHandler
+from app.core.chat.chatgpt_bridge import ChatGPTBridge
 
 
 class AbstractResponseGenerationModule:
@@ -11,7 +11,7 @@ class AbstractResponseGenerationModule:
 
 # TODO implement the module
 class ChatGPTBasedResponseGenerationModule(AbstractResponseGenerationModule):
-    def __init__(self, chatgpt_handler: ChatGPTHandler):
+    def __init__(self, chatgpt_handler: ChatGPTBridge):
         self.chatgpt_handler = chatgpt_handler
 
     def generate_response(self, *args, **kwargs) -> str:

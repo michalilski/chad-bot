@@ -18,5 +18,5 @@ with gr.Blocks() as demo:
     clear.click(lambda: None, None, chatbot, queue=False)
 
 demo.launch(
-    server_name="0.0.0.0", debug=True, prevent_thread_lock=False, inbrowser=True, ssl_verify=False
+    server_name="0.0.0.0", debug=True, prevent_thread_lock=False, inbrowser=False, ssl_verify=False
 )  # share=True when app is ready

@@ -30,5 +30,6 @@ class Ticket(Base):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
     show_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey(Show.id))
     seat_number = sqlalchemy.Column(sqlalchemy.Integer)
+    pin = sqlalchemy.Column(sqlalchemy.Integer)
 
     show = relationship("Show", foreign_keys="Ticket.show_id")
