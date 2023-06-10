@@ -2,7 +2,7 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import List, Tuple, Dict, Union
 
-from app.core.chat.dialogue_structs.action import Action
+from app.core.chat.dialogue_structs.action import Action, OutlineElement
 from app.core.chat.dialogue_structs.dialogue_act import DialogueActEnum
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
@@ -33,7 +33,7 @@ class TaskState:
         return [f"{slot.name} ({slot.description})" for slot in self.slots]
 
     @abstractmethod
-    def generate_next_action(self) -> Action:
+    def generate_next_actions(self) -> List[OutlineElement]:
         pass
 
     def _request_next_required_empty_slot(self) -> Action:

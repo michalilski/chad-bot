@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from app.core.chat.dialogue_structs.action import Action
+from app.core.chat.dialogue_structs.action import Action, OutlineElement
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dst.dst_module import DSTModule
 from app.core.chat.dst.intent_detection import AbstractIntentDetectionModule
@@ -40,8 +40,8 @@ class DialogueLoop:
             current_state: TaskState = self.states[current_intent]
             self.dst.update_state(message, current_state)
 
-            action: Action = current_state.generate_next_action()
-            outline = action.generate_outline()
+            outline_elements: List[OutlineElement] = current_state.generate_next_actions()
+            outline = " ".join([action.generate_outline() for action in outline_elements])
 
             return outline
         except ChatProcessingException:

@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Type
 
-from app.core.chat.dialogue_structs.action import Action
+from app.core.chat.dialogue_structs.action import Action, OutlineElement, OutlineTextInsert
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
 from app.core.chat.task_states.task_state import TaskState, NoSlotsToRequest
@@ -21,11 +21,14 @@ class ListMoviesState(TaskState):
             ]
         )
 
-    def generate_next_action(self) -> Action:
+    def generate_next_actions(self) -> List[OutlineElement]:
         try:
-            return self._request_next_required_empty_slot()
+            return [self._request_next_required_empty_slot()]
         except NoSlotsToRequest:
-            return self._inform_about_all_filled_slots()
+            return [
+                OutlineTextInsert("Those are the movies i managed to find given your criteria: "),
+                self._inform_about_all_filled_slots()
+            ]
 
 
 # @dataclass
