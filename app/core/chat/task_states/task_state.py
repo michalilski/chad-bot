@@ -34,6 +34,10 @@ class TaskState:
     def generate_next_response(self, nlg: NLG) -> str:
         pass
 
+    @abstractmethod
+    def generate_suggestions(self, nlg: NLG) -> str:
+        pass
+
     def _get_next_empty_required_slot(self) -> SlotMapping:
         for slot in self.slots:
             if slot.is_required and slot.is_empty:
@@ -48,4 +52,8 @@ class TaskState:
 
 
 class NoSlotsToRequest(Exception):
+    pass
+
+
+class NoSlotsToSuggest(Exception):
     pass

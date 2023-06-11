@@ -1,8 +1,9 @@
 from enum import Enum
 
 
-class IntentEnum(str, Enum):
+class IntentEnum(Enum):
     LIST_MOVIES = "prepare a list of movies"
+    GIVE_SUGGESTIONS = "provide user with information on what he can do or ask for"
     # BUY_TICKET = "buy a ticket for a show"
     # MOVIE_SUMMARY = "describe the movie"
     # CANCEL_INTENT = "cancel current procedure"

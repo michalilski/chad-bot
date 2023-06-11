@@ -22,16 +22,13 @@ class DialogueLoop:
         self.last_intent: IntentEnum = IntentEnum.UNKNOWN
         self.states: Dict[IntentEnum, TaskState] = {
             IntentEnum.LIST_MOVIES: ListMoviesState(),
-            # IntentEnum.BUY_TICKET: BuyTicketState,
-            # IntentEnum.MOVIE_SUMMARY: MovieSummaryState,
-            # IntentEnum.CANCEL_INTENT: CancelIntentState,
-            # IntentEnum.CANCEL_RESERVATION: CancelReservationState,
-            # IntentEnum.UNKNOWN: UnknownIntentState,
         }
 
     def answer(self, chat_history: List[str], message: str) -> str:
         try:
             current_intent: IntentEnum = self.intent_detector.recognize_intent(message)
+            if current_intent is IntentEnum.GIVE_SUGGESTIONS:
+                return self.states[self.last_intent].generate_suggestions(self.nlg)
             if current_intent is IntentEnum.UNKNOWN:
                 current_intent = self.last_intent
             # NOTE: reset the state if intent changed?
@@ -39,7 +36,6 @@ class DialogueLoop:
             current_state: TaskState = self.states[current_intent]
             self.dst.update_state(message, current_state)
 
-            response = current_state.generate_next_response(self.nlg)
-            return response
+            return current_state.generate_next_response(self.nlg)
         except ChatProcessingException:
             return PROCESSING_ERROR_MESSAGE

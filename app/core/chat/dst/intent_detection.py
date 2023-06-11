@@ -20,23 +20,23 @@ class ChatGPTBasedIntentDetectionModule(AbstractIntentDetectionModule):
     def __init__(self, chatgpt_handler: ChatGPTBridge):
         self.chatgpt_handler = chatgpt_handler
 
-    def fuzzy_intent_matching(self, response: str, intents: List[str]) -> IntentEnum:
-        current_intent: str = intents[0]
-        max_score: int = 0
-        for intent in intents:
-            score: int = fuzz.ratio(response, intent)
-            if score > max_score:
-                current_intent = intent
-                max_score = score
-        return IntentEnum(current_intent)
-
     def recognize_intent(self, message: str) -> IntentEnum:
-        intents: List[str] = [intent.value for intent in IntentEnum]
-        prompt: str = self.id_prompt.format(", ".join(intents), message)
+        intents: str = ", ".join(f"{intent.name} ({intent.value})" for intent in IntentEnum)
+        prompt: str = self.id_prompt.format(intents, message)
         intent_response: str = self.chatgpt_handler.request(prompt)
         try:
             intent = IntentEnum(intent_response)
         except ValueError:
             logging.warn(f"Unknown intent: {intent_response}. Performing fuzzy matching.")
-            intent = self.fuzzy_intent_matching(intent_response, intents)
+            intent = self.fuzzy_intent_matching(intent_response)
         return intent
+
+    def fuzzy_intent_matching(self, response: str) -> IntentEnum:
+        current_intent = list(IntentEnum)[0]
+        max_score: int = 0
+        for intent in IntentEnum:
+            score: int = fuzz.ratio(response, intent.name)
+            if score > max_score:
+                current_intent = intent
+                max_score = score
+        return current_intent

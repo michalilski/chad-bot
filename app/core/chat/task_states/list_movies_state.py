@@ -4,7 +4,7 @@ from typing import List
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
 from app.core.chat.nlg.nlg import NLG
-from app.core.chat.task_states.task_state import TaskState, NoSlotsToRequest
+from app.core.chat.task_states.task_state import TaskState, NoSlotsToRequest, NoSlotsToSuggest
 
 
 @dataclass
@@ -50,6 +50,7 @@ class ListMoviesState(TaskState):
                 ),
             ]
         )
+        self.suggestions_already_made = False
 
     def generate_next_response(self, nlg: NLG) -> str:
         try:
@@ -65,14 +66,20 @@ class ListMoviesState(TaskState):
             "Movie 1: Titanic 2 from 2013, Movie 2: The Bible Rebuild from 1995."
         )
         response = nlg.rewrite_outline(outline)
-        empty_slots = self._get_all_empty_slots()
-
-        if empty_slots:
-            suggestions_outline = (
-                "You can also specify the following details about the search: "
-                f"{', '.join([slot.description for slot in empty_slots])}"
-            )
-            suggestions = nlg.rewrite_outline(suggestions_outline)
+        if not self.suggestions_already_made:
+            suggestions = self.generate_suggestions(nlg)
             response = f"{response} {suggestions}"
-
+            self.suggestions_already_made = True
         return response
+
+    def generate_suggestions(self, nlg: NLG) -> str:
+        empty_slots = self._get_all_empty_slots()
+        if not empty_slots:
+            raise NoSlotsToSuggest()
+
+        suggestions_outline = (
+            "You can also specify the following details about the search: "
+            f"{', '.join([slot.description for slot in empty_slots])}"
+        )
+        suggestions = nlg.rewrite_outline(suggestions_outline)
+        return suggestions
