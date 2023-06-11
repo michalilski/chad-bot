@@ -3,7 +3,7 @@ import logging
 from typing import Any, Dict
 
 from app.core.chat.chatgpt_bridge import ChatGPTBridge
-from app.core.chat.task_states.states import TaskState
+from app.core.chat.task_states import TaskState
 from app.exceptions import ChatProcessingException
 
 

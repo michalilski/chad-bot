@@ -1,35 +1,4 @@
 import logging
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Type
-
-from app.core.chat.dialogue_structs.action import Action, OutlineElement, OutlineTextInsert
-from app.core.chat.dialogue_structs.intent import IntentEnum
-from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
-from app.core.chat.task_states.task_state import TaskState, NoSlotsToRequest
-
-
-@dataclass
-class ListMoviesState(TaskState):
-    def __init__(self):
-        super().__init__(
-            IntentEnum.LIST_MOVIES,
-            slots=[
-                SlotMapping("date", "the date of the screening of the movie", is_required=True),
-                SlotMapping("from_hour", "beginning hour of requested screenings of the movie"),
-                SlotMapping("to_hour", "ending hour of requested screenings of the movie"),
-                SlotMapping("genre", "genre of the movie"),
-            ]
-        )
-
-    def generate_next_actions(self) -> List[OutlineElement]:
-        try:
-            return [self._request_next_required_empty_slot()]
-        except NoSlotsToRequest:
-            return [
-                OutlineTextInsert("Those are the movies i managed to find given your criteria: "),
-                self._inform_about_all_filled_slots()
-            ]
-
 
 # @dataclass
 # class BuyTicketState(AbstractState):

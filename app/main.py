@@ -11,6 +11,7 @@ def respond(message, chat_history):
 
 with gr.Blocks() as demo:
     chatbot = gr.Chatbot()
+    chatbot.style(height=750)
     msg = gr.Textbox()
     clear = gr.Button("Clear")
 

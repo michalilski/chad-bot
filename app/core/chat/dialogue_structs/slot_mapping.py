@@ -6,6 +6,8 @@ from typing import List, Optional, Union
 class SlotMapping:
     name: str
     description: str
+    _info_template: str
+    _request_template: str
     is_required: bool = False
     _is_guessed: bool = False
     _values: Optional[List[str]] = None
@@ -37,12 +39,10 @@ class SlotMapping:
         self._values = values
         self._is_guessed = True
 
-    def __hash__(self):
-        return hash(self.name)
+    @property
+    def info_template(self):
+        return self._info_template.format(*self._values)
 
-    def __eq__(self, other):
-        if isinstance(other, str):
-            return self.name == other
-        if isinstance(other, SlotMapping):
-            return self is other
-        return False
+    @property
+    def request_template(self):
+        return self._request_template

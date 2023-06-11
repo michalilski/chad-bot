@@ -1,11 +1,9 @@
 from abc import abstractmethod
-from dataclasses import dataclass, field
-from typing import List, Tuple, Dict, Union
+from typing import List, Dict, Union
 
-from app.core.chat.dialogue_structs.action import Action, OutlineElement
-from app.core.chat.dialogue_structs.dialogue_act import DialogueActEnum
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
+from app.core.chat.nlg.nlg import NLG
 
 
 class TaskState:
@@ -33,18 +31,20 @@ class TaskState:
         return [f"{slot.name} ({slot.description})" for slot in self.slots]
 
     @abstractmethod
-    def generate_next_actions(self) -> List[OutlineElement]:
+    def generate_next_response(self, nlg: NLG) -> str:
         pass
 
-    def _request_next_required_empty_slot(self) -> Action:
+    def _get_next_empty_required_slot(self) -> SlotMapping:
         for slot in self.slots:
             if slot.is_required and slot.is_empty:
-                return Action(intent=self.intent, act=DialogueActEnum.REQUEST, slot_mappings=[slot])
+                return slot
         raise NoSlotsToRequest()
 
-    def _inform_about_all_filled_slots(self) -> Action:
-        filled_slots = [slot for slot in self.slots if not slot.is_empty]
-        return Action(intent=self.intent, act=DialogueActEnum.INFORM, slot_mappings=filled_slots)
+    def _get_all_filled_slots(self) -> List[SlotMapping]:
+        return [slot for slot in self.slots if not slot.is_empty]
+
+    def _get_all_empty_slots(self) -> List[SlotMapping]:
+        return [slot for slot in self.slots if slot.is_empty]
 
 
 class NoSlotsToRequest(Exception):
