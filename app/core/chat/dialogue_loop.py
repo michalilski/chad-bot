@@ -68,8 +68,10 @@ class DialogueLoop:
         while True:
             if self._current_intent is IntentEnum.BOOK_TICKETS:
                 yield book_ticket_state.generate_next_response(self.nlg)
-            elif self._current_intent is IntentEnum.PULL_TRIGGER:
-                "YOU ARE A HAPPY OWNER OF THE TICKET!"
+            elif self._current_intent is IntentEnum.AFFIRMATIVE:
+                yield "YOU ARE A HAPPY OWNER OF THE TICKET!"
+            elif self._current_intent is IntentEnum.NEGATIVE:
+                yield "No ticket for you then lol!"
 
     def _see_booking_path_gen(self):
         yield "NOT YET IMPLEMENTED"

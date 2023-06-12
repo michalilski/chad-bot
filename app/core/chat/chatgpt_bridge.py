@@ -1,4 +1,5 @@
 import logging
+import time
 
 import openai
 
@@ -10,13 +11,13 @@ class ChatGPTBridge:
     def __init__(self):
         openai.api_key = config["OpenAI"]["api_key"]
 
-    def request(self, prompt: str) -> str:
+    def request(self, prompt: str, num_attempts: int = 2) -> str:
+        if num_attempts <= 0:
+            raise ChatProcessingException
         try:
-            completion = openai.ChatCompletion.create(
+            return openai.ChatCompletion.create(
                 model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}]
-            )
+            ).choices[0].message.content
         except ChatGPTConnectionError as e:
             logging.error(f"{type(e).__name__}: {e}")
-            raise ChatProcessingException
-
-        return completion.choices[0].message.content
+        return self.request(prompt, num_attempts=num_attempts-1)
