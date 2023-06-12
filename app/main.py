@@ -1,15 +1,24 @@
 import gradio as gr
 
-from app.core.chat import chatgpt_based_dialogue_handler
-
-
-def respond(message, chat_history):
-    bot_message = chatgpt_based_dialogue_handler.answer(chat_history, message)
-    chat_history.append((message, bot_message))
-    return "", chat_history
-
+from app.core.chat import ChatGPTBridge, DialogueLoop
+from app.core.chat.dst.dst_module import DSTModule
+from app.core.chat.dst.intent_detection import ChatGPTBasedIntentDetectionModule
+from app.core.chat.nlg.nlg import NLG
 
 with gr.Blocks() as demo:
+    dialogue_loop: DialogueLoop = DialogueLoop(
+        DSTModule(),
+        ChatGPTBasedIntentDetectionModule(),
+        NLG(),
+    )
+
+
+    def respond(message, chat_history):
+        bot_message = dialogue_loop.step(message)
+        chat_history.append((message, bot_message))
+        return "", chat_history
+
+
     chatbot = gr.Chatbot()
     chatbot.style(height=750)
     msg = gr.Textbox()

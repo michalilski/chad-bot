@@ -8,4 +8,3 @@ Base.metadata.create_all(db_engine)
 
 Session = sessionmaker()
 Session.configure(bind=db_engine)
-db_session = Session()

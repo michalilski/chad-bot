@@ -1,24 +1,29 @@
 from dataclasses import dataclass
 from typing import List
 
-from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
 from app.core.chat.nlg.nlg import NLG
 from app.core.chat.task_states.task_state import TaskState, NoSlotsToRequest, NoSlotsToSuggest
 
 
 @dataclass
-class ListMoviesState(TaskState):
+class BookTicketState(TaskState):
     def __init__(self):
         super().__init__(
-            IntentEnum.LIST_MOVIES,
-            slots=[
+            [
+                SlotMapping(
+                    name="title",
+                    description="the title of the movie",
+                    _info_template="The movie is called {}",
+                    _request_template="Which movie are you interested in?",
+                    is_required=False
+                ),
                 SlotMapping(
                     name="date",
                     description="the date of the screening of the movie",
                     _info_template="The screening happens on {}",
                     _request_template="What is the date of the screening of the movie?",
-                    is_required=True
+                    is_required=False
                 ),
                 SlotMapping(
                     name="from_hour",
@@ -61,9 +66,12 @@ class ListMoviesState(TaskState):
             pass
         filled_slots: List[SlotMapping] = self._get_all_filled_slots()
         criteria = ". ".join(slot.info_template for slot in filled_slots)
+        screenings = "Movie 1: Titanic 2 from 2013, Movie 2: The Bible Rebuild from 1995."
+
         outline = (
-            f"According to the criteria you asked for: {criteria} I found the following screenings: "
-            "Movie 1: Titanic 2 from 2013, Movie 2: The Bible Rebuild from 1995."
+            f"According to the criteria you asked for: {criteria} I found the following screenings:"
+            f"{screenings}"
+            "Which one would you like to book a ticket for?"
         )
         response = nlg.rewrite_outline(outline)
         if not self.suggestions_already_made:

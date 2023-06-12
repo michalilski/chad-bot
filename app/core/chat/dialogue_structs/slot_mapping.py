@@ -16,6 +16,10 @@ class SlotMapping:
     def is_empty(self) -> bool:
         return self.values is None
 
+    @property
+    def is_filled(self) -> bool:
+        return not self.is_empty
+
     def is_guessed(self) -> bool:
         return self._is_guessed
 

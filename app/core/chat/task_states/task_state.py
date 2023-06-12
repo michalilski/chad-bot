@@ -7,9 +7,14 @@ from app.core.chat.nlg.nlg import NLG
 
 
 class TaskState:
-    def __init__(self, intent: IntentEnum, slots: List[SlotMapping]):
-        self.intent: IntentEnum = intent
+    def __init__(self, slots: List[SlotMapping]):
         self.slots: List[SlotMapping] = slots
+
+    def __getitem__(self, slot_name: str) -> SlotMapping:
+        for slot in self.slots:
+            if slot.name == slot_name:
+                return slot
+        raise ValueError(f"No slot named {slot_name}")
 
     def reset(self):
         for slot in self.slots:

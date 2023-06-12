@@ -2,11 +2,9 @@ from enum import Enum
 
 
 class IntentEnum(Enum):
-    LIST_MOVIES = "prepare a list of movies"
-    GIVE_SUGGESTIONS = "provide user with information on what he can do or ask for"
-    # BUY_TICKET = "buy a ticket for a show"
-    # MOVIE_SUMMARY = "describe the movie"
-    # CANCEL_INTENT = "cancel current procedure"
-    # CANCEL_RESERVATION = "cancel reservation for the show"
-    # INFO_ABOUT_POSSIBLE_SLOTS = "information about things the user can ask about"
+    # LIST_MOVIES = "prepare a list of movies"
+    BOOK_TICKETS = "user want to book tickets for movie/list movies"
+    SEE_BOOKING = "user want to access information regarding his already booked ticket"
+    # GIVE_SUGGESTIONS = "provide user with information on what he can do or ask for"
+    PULL_TRIGGER = "the user confirms that he made the decision regarding buying ticket"
     UNKNOWN = "unknown intent"

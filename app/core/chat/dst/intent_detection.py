@@ -17,8 +17,8 @@ class AbstractIntentDetectionModule:
 class ChatGPTBasedIntentDetectionModule(AbstractIntentDetectionModule):
     id_prompt: str = "Recognize the intent from list [{0}]" ' for a given utterance: "{1}".'
 
-    def __init__(self, chatgpt_handler: ChatGPTBridge):
-        self.chatgpt_handler = chatgpt_handler
+    def __init__(self):
+        self.chatgpt_handler = ChatGPTBridge()
 
     def recognize_intent(self, message: str) -> IntentEnum:
         intents: str = ", ".join(f"{intent.name} ({intent.value})" for intent in IntentEnum)

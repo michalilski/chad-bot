@@ -14,8 +14,8 @@ class DSTModule:
         " Return empty slots as NA."
     )
 
-    def __init__(self, chatgpt_bridge: ChatGPTBridge):
-        self.chatgpt_bridge = chatgpt_bridge
+    def __init__(self):
+        self.chatgpt_bridge = ChatGPTBridge()
 
     def update_state(self, text: str, state: TaskState):
         if not state.slots:
