@@ -64,7 +64,7 @@ class DialogueLoop:
         while book_ticket_state["title"].is_empty and book_ticket_state["date"].is_empty:
             yield "I need you to provide either a name of the movie or when you want to watch the movie."
 
-        # TODO: obviosly, fix
+        # TODO: obviosly, add an exit condition
         while True:
             if self._current_intent is IntentEnum.BOOK_TICKETS:
                 yield book_ticket_state.generate_next_response(self.nlg)
