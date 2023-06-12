@@ -62,7 +62,7 @@ class DialogueLoop:
         self._current_state = book_ticket_state
         self._update_current_state()
         while book_ticket_state["title"].is_empty and book_ticket_state["date"].is_empty:
-            yield "I need you to provide either a name of the movie or what you want to watch the movie."
+            yield "I need you to provide either a name of the movie or when you want to watch the movie."
 
         # TODO: obviosly, fix
         while True:
