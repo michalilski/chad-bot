@@ -1,15 +1,10 @@
 from dataclasses import dataclass
-from datetime import datetime
 from typing import List, Tuple
-
-import parsedatetime
-from fuzzywuzzy import fuzz
-from sqlalchemy import func
 
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
 from app.core.chat.task_states.task_state import NoSlotsToRequest, NoSlotsToSuggest, TaskState
-from app.core.db.engine import Session
-from app.core.db.models import Movie, Show
+from app.core.db.db_bridge import DatabaseBridge
+from app.core.db.models import Show
 
 READY_TO_PURCHASE = bool
 
@@ -60,8 +55,8 @@ class BookTicketState(TaskState):
                 ),
             ]
         )
-        self.cal: parsedatetime.Calendar = parsedatetime.Calendar()
-        self.movie_titles: Tuple[str, ...] = self.fetch_movie_titles()
+        self.db_bridge: DatabaseBridge = DatabaseBridge()
+        self.movie_titles: Tuple[str, ...] = self.db_bridge.fetch_movie_titles()
 
     def generate_next_response(self) -> Tuple[str, READY_TO_PURCHASE]:
         if self["title"].is_empty and self["date"].is_empty:
@@ -97,10 +92,16 @@ class BookTicketState(TaskState):
         return suggestions_outline
 
     def _get_screenings(self) -> List[Show]:
-        filters: List[bool] = self.prepare_filters()
-        with Session() as session:
-            results = session.query(Show).join(Movie).filter(*filters).limit(self.query_limit)
-        return [show for show in results]
+        return self.db_bridge.get_screenings(
+            title=self["title"].value,
+            genre=self["genre"].value,
+            date=self["date"].value,
+            from_hour=self["from_hour"].value,
+            to_hour=self["to_hour"].value,
+            possible_movie_titles=self.movie_titles,
+            matching_title_threshold=self.matching_title_threshold,
+            query_limit=self.query_limit,
+        )
 
     def _generate_outline_for_screenings(self, screenings: List[Show]) -> Tuple[str, READY_TO_PURCHASE]:
         criteria = ". ".join(slot.info_template for slot in self._get_all_filled_slots())
@@ -123,51 +124,3 @@ class BookTicketState(TaskState):
             f"{self.generate_suggestions_outline()}"
         )
         return outline, READY_TO_PURCHASE(False)
-
-    def prepare_filters(self) -> List[bool]:
-        filters: List[bool] = []
-        if self["title"].value is not None:
-            score_results = [(fuzz.ratio(self["title"].value, m_title), m_title) for m_title in self.movie_titles]
-            matching_title = min(score_results, key=lambda x: -x[0])
-            if matching_title[0] >= self.matching_title_threshold:
-                filters.append(Movie.title == matching_title[1])
-
-        if self["genre"].value is not None:
-            filters.append(func.lower(Movie.genre) == self["genre"].value.lower())
-
-        if self["date"].value is not None:
-            from_hour: str = "00:00"
-            if self["from_hour"].value is not None:
-                from_hour = self["from_hour"].value
-            parsed_from_time: datetime = self.parse_time(self["date"].value, from_hour)
-            filters.append(Show.show_time >= parsed_from_time)
-
-            till_hour: str = "23:59"
-            if self["to_hour"].value is not None:
-                till_hour = self["to_hour"].value
-            parsed_till_time: datetime = self.parse_time(self["date"].value, till_hour)
-            filters.append(Show.show_time <= parsed_till_time)
-
-        return filters
-
-    def convert_numeric_time(self, raw_time):
-        try:
-            x = int(raw_time)
-            if x > 24:
-                return raw_time[:-2] + ":" + raw_time[-2:]
-            return raw_time + ":00"
-        except:
-            try:
-                x = float(raw_time)
-                return str(int(x)) + ":" + str("%.2f" % x)[3:]
-            except:
-                return raw_time
-
-    def fetch_movie_titles(self) -> Tuple[str, ...]:
-        with Session() as session:
-            movies: Tuple[str, ...] = tuple(res[0] for res in session.query(Movie.title).all())
-        return movies
-
-    def parse_time(self, raw_date, raw_time):
-        parsed_time = self.convert_numeric_time(raw_time)
-        return self.cal.parseDT(f"{raw_date}, {parsed_time}")[0]
