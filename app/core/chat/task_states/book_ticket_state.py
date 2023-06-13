@@ -69,7 +69,7 @@ class BookTicketState(TaskState):
             pass
         filled_slots: List[SlotMapping] = self._get_all_filled_slots()
         criteria = ". ".join(slot.info_template for slot in filled_slots)
-        screenings = ["Titanic 2 from 2013", "The Bible Rebuild from 1995"]
+        screenings = ["Titanic 2 from 2013", "The Bible Rebuild from 1995"] #TODO: Michał zrób z bazy danych
         screenings_text = ". ".join(f"Movie {i+1}: {text}" for i, text in enumerate(screenings))
         response = nlg.rewrite_outline(
             f"According to the criteria you asked for: {criteria} I found the following screenings:"
