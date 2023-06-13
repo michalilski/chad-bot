@@ -27,6 +27,7 @@ class DialogueLoop:
         self._path_iterator = iter(self._main_path_gen(greet_user=False))
 
     def reset_main_path(self, greet_user: bool = False):
+        self._current_intent = IntentEnum.UNKNOWN
         self._path_iterator = iter(self._main_path_gen(greet_user=greet_user))
 
     def step(self, message: str) -> str:
@@ -35,12 +36,18 @@ class DialogueLoop:
             detected_intent: IntentEnum = self.intent_detector.recognize_intent(message)
             if detected_intent is not IntentEnum.UNKNOWN:
                 self._current_intent = detected_intent
+            if detected_intent is IntentEnum.CANCEL_PROCEDURE:
+                self.reset_main_path()
+                return "I see you want to do something different... What do you want to do right now then?"
             self._update_current_state()
             response = next(self._path_iterator)
             self._last_response = response
             return response
         except ChatProcessingException:
             return PROCESSING_ERROR_MESSAGE
+        except StopIteration:
+            self.reset_main_path()
+            return "No problems can I help you with something else?"
 
     def _update_current_state(self):
         self.dst.update_state(self._current_message, self._current_state)
@@ -61,17 +68,17 @@ class DialogueLoop:
         book_ticket_state: BookTicketState = BookTicketState()
         self._current_state = book_ticket_state
         self._update_current_state()
-        while book_ticket_state["title"].is_empty and book_ticket_state["date"].is_empty:
-            yield "I need you to provide either a name of the movie or when you want to watch the movie."
 
-        # TODO: obviosly, add an exit condition
+        # TODO: obviously, add an exit condition
         while True:
             if self._current_intent is IntentEnum.BOOK_TICKETS:
                 yield book_ticket_state.generate_next_response(self.nlg)
             elif self._current_intent is IntentEnum.AFFIRMATIVE:
                 yield "YOU ARE A HAPPY OWNER OF THE TICKET!"
+                return
             elif self._current_intent is IntentEnum.NEGATIVE:
                 yield "No ticket for you then lol!"
+                return
 
     def _see_booking_path_gen(self):
         yield "NOT YET IMPLEMENTED"

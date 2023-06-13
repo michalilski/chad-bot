@@ -58,27 +58,25 @@ class BookTicketState(TaskState):
         self.suggestions_already_made = False
 
     def generate_next_response(self, nlg: NLG) -> str:
+        if self["title"].is_empty and self["date"].is_empty:
+            return "I need you to provide either a name of the movie or when you want to watch the movie."
         try:
             next_required_slot: SlotMapping = self._get_next_empty_required_slot()
-            outline = f"Please tell me those information about the screenings: {next_required_slot.request_template}"
-            return nlg.rewrite_outline(outline)
+            return nlg.rewrite_outline(
+                f"Please tell me those information about the screenings: {next_required_slot.request_template}"
+            )
         except NoSlotsToRequest:
             pass
         filled_slots: List[SlotMapping] = self._get_all_filled_slots()
         criteria = ". ".join(slot.info_template for slot in filled_slots)
-        screenings = "Movie 1: Titanic 2 from 2013, Movie 2: The Bible Rebuild from 1995."
-
-        outline = (
+        screenings = ["Titanic 2 from 2013", "The Bible Rebuild from 1995"]
+        screenings_text = ". ".join(f"Movie{i}" for i, text in enumerate(screenings))
+        response = nlg.rewrite_outline(
             f"According to the criteria you asked for: {criteria} I found the following screenings:"
-            f"{screenings}"
+            f"{screenings_text}"
             "Which one would you like to book a ticket for?"
         )
-        response = nlg.rewrite_outline(outline)
-        if not self.suggestions_already_made:
-            suggestions = self.generate_suggestions(nlg)
-            response = f"{response} {suggestions}"
-            self.suggestions_already_made = True
-        return response
+        return self._add_suggestions(nlg, response)
 
     def generate_suggestions(self, nlg: NLG) -> str:
         empty_slots = self._get_all_empty_slots()
@@ -91,3 +89,10 @@ class BookTicketState(TaskState):
         )
         suggestions = nlg.rewrite_outline(suggestions_outline)
         return suggestions
+
+    def _add_suggestions(self, nlg, response):
+        if not self.suggestions_already_made:
+            suggestions = self.generate_suggestions(nlg)
+            response = f"{response} {suggestions}"
+            self.suggestions_already_made = True
+        return response
