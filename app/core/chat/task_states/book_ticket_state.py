@@ -67,7 +67,7 @@ class BookTicketState(TaskState):
             )
         except NoSlotsToRequest:
             pass
-        screenings = self._get_acreenings()
+        screenings = self._get_screenings()
         screenings_text = ". ".join(f"Movie {i + 1}: {text}" for i, text in enumerate(screenings))
 
         criteria = ". ".join(slot.info_template for slot in self._get_all_filled_slots())
@@ -76,7 +76,14 @@ class BookTicketState(TaskState):
             f"{screenings_text}"
             "Which one would you like to book a ticket for?"
         )
-        return self._add_suggestions(nlg, response)
+        return self._add_suggestions_to_response(nlg, response)
+
+    def _add_suggestions_to_response(self, nlg, response):
+        if not self.suggestions_already_made:
+            suggestions = self.generate_suggestions(nlg)
+            response = f"{response} {suggestions}"
+            self.suggestions_already_made = True
+        return response
 
     def generate_suggestions(self, nlg: NLG) -> str:
         empty_slots = self._get_all_empty_slots()
@@ -90,13 +97,6 @@ class BookTicketState(TaskState):
         suggestions = nlg.rewrite_outline(suggestions_outline)
         return suggestions
 
-    def _add_suggestions(self, nlg, response):
-        if not self.suggestions_already_made:
-            suggestions = self.generate_suggestions(nlg)
-            response = f"{response} {suggestions}"
-            self.suggestions_already_made = True
-        return response
-
-    def _get_acreenings(self):
+    def _get_screenings(self):
         # TODO: @michał implement query to to the database.
         return ["Titanic 2 from 2013", "The Bible Rebuild from 1995"]
