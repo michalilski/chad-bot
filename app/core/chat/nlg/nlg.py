@@ -9,7 +9,7 @@ class NLG:
 
     PROMPTS_WITH_USER_MESSAGE = {
         "none": 'User said: "{}". Answer this to the user and make it sound natural and grammatically correct: {}',
-        "anime": 'User said: "{}". Answer this to the user and make it sound natural and grammatically correct (speak like a flirty anime waifu from a dating sim. refer to user as sempai): {}'
+        "anime": 'User said: "{}". Answer this to the user and make it sound natural and grammatically correct (speak like a flirty anime waifu from a dating sim. refer to user as sempai): {}',
     }
 
     def __init__(self, style: str = "none"):

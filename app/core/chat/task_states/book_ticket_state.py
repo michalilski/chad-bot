@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Tuple
 
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
-from app.core.chat.task_states.task_state import TaskState, NoSlotsToRequest, NoSlotsToSuggest
+from app.core.chat.task_states.task_state import NoSlotsToRequest, NoSlotsToSuggest, TaskState
 
 READY_TO_PURCHASE = bool
 
@@ -17,42 +17,42 @@ class BookTicketState(TaskState):
                     description="the title of the movie",
                     _info_template="The movie is called {}",
                     _request_template="Which movie are you interested in?",
-                    is_required=False
+                    is_required=False,
                 ),
                 SlotMapping(
                     name="date",
                     description="the date of the screening of the movie",
                     _info_template="The screening happens on {}",
                     _request_template="What is the date of the screening of the movie?",
-                    is_required=False
+                    is_required=False,
                 ),
                 SlotMapping(
                     name="from_hour",
                     description="beginning hour of requested screenings of the movie",
                     _info_template="The screening are listed from {}",
                     _request_template="From what hour do you want to list the screenings?",
-                    is_required=False
+                    is_required=False,
                 ),
                 SlotMapping(
                     name="to_hour",
                     description="ending hour of requested screenings of the movie",
                     _info_template="The screening are listed until {}",
                     _request_template="Until what hour do you want to list the screenings?",
-                    is_required=False
+                    is_required=False,
                 ),
                 SlotMapping(
                     name="date",
                     description="the date of the screening of the movie",
                     _info_template="The screening happens on {}",
                     _request_template="What is the date of the screening of the movie?",
-                    is_required=False
+                    is_required=False,
                 ),
                 SlotMapping(
                     name="genre",
                     description="genre of the movie",
                     _info_template="The movie is a {}",
                     _request_template="What genre of movies do you want to list?",
-                    is_required=False
+                    is_required=False,
                 ),
             ]
         )
@@ -60,10 +60,16 @@ class BookTicketState(TaskState):
 
     def generate_next_response(self) -> Tuple[str, READY_TO_PURCHASE]:
         if self["title"].is_empty and self["date"].is_empty:
-            return "I need you to provide either a name of the movie or when you want to watch the movie.", READY_TO_PURCHASE(False)
+            return (
+                "I need you to provide either a name of the movie or when you want to watch the movie.",
+                READY_TO_PURCHASE(False),
+            )
         try:
             next_required_slot: SlotMapping = self._get_next_empty_required_slot()
-            return f"Please tell me those information about the screenings: {next_required_slot.request_template}", READY_TO_PURCHASE(False)
+            return (
+                f"Please tell me those information about the screenings: {next_required_slot.request_template}",
+                READY_TO_PURCHASE(False),
+            )
         except NoSlotsToRequest:
             pass
         screenings = self._get_screenings()
@@ -95,11 +101,15 @@ class BookTicketState(TaskState):
         criteria = ". ".join(slot.info_template for slot in self._get_all_filled_slots())
 
         if len(screenings) == 0:
-            return f"Unfortunately there are no screenings meeting your criteria: {criteria}. Please update your criteria. {self.generate_suggestions_outline()}", READY_TO_PURCHASE(
-                False
+            return (
+                f"Unfortunately there are no screenings meeting your criteria: {criteria}. Please update your criteria. {self.generate_suggestions_outline()}",
+                READY_TO_PURCHASE(False),
             )
         if len(screenings) == 1:
-            return f"The screening I found for your criteria is {screenings[0]}. Do you want me to book you a ticket for this movie?", READY_TO_PURCHASE(True)
+            return (
+                f"The screening I found for your criteria is {screenings[0]}. Do you want me to book you a ticket for this movie?",
+                READY_TO_PURCHASE(True),
+            )
         screenings_text = ". ".join(f"Movie {i + 1}: {text}" for i, text in enumerate(screenings))
         outline = (
             f"According to the criteria you asked for: {criteria} I found the following screenings:"

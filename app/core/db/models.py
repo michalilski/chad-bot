@@ -22,7 +22,7 @@ class Show(Base):
     movie_id = sqlalchemy.Column(sqlalchemy.String(length=20), sqlalchemy.ForeignKey(Movie.imdb_id))
     show_time = sqlalchemy.Column(sqlalchemy.DateTime)
 
-    movie = relationship("Movie", foreign_keys="Show.movie_id", lazy='joined')
+    movie = relationship("Movie", foreign_keys="Show.movie_id", lazy="joined")
 
 
 class Ticket(Base):
@@ -32,4 +32,4 @@ class Ticket(Base):
     seat_number = sqlalchemy.Column(sqlalchemy.Integer)
     pin = sqlalchemy.Column(sqlalchemy.Integer)
 
-    show = relationship("Show", foreign_keys="Ticket.show_id", lazy='joined')
+    show = relationship("Show", foreign_keys="Ticket.show_id", lazy="joined")

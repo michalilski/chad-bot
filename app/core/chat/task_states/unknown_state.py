@@ -12,5 +12,5 @@ class UnknownState(TaskState):
     def generate_next_response(self, nlg: NLG) -> str:
         return "I'm sorry I dont understand. Im in unknown state. Patch me :x"
 
-    def generate_suggestions_outline(self, nlg: NLG) -> str:
+    def generate_suggestions_outline(self) -> str:
         return "Tell me dyour deepest desires. Maybe that will help. Im unknown state."

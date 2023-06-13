@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
