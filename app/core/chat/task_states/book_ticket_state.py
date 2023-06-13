@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import List, Tuple
 
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
-from app.core.chat.nlg.nlg import NLG
 from app.core.chat.task_states.task_state import TaskState, NoSlotsToRequest, NoSlotsToSuggest
 
 READY_TO_PURCHASE = bool
@@ -59,20 +58,16 @@ class BookTicketState(TaskState):
         )
         self.suggestions_already_made = False
 
-    def generate_next_response(self, nlg: NLG) -> Tuple[str, READY_TO_PURCHASE]:
+    def generate_next_response(self) -> Tuple[str, READY_TO_PURCHASE]:
         if self["title"].is_empty and self["date"].is_empty:
-            return nlg.rewrite_outline("I need you to provide either a name of the movie or when you want to watch the movie."), READY_TO_PURCHASE(False)
+            return "I need you to provide either a name of the movie or when you want to watch the movie.", READY_TO_PURCHASE(False)
         try:
             next_required_slot: SlotMapping = self._get_next_empty_required_slot()
-            return nlg.rewrite_outline(
-                f"Please tell me those information about the screenings: {next_required_slot.request_template}"
-            ), READY_TO_PURCHASE(False)
+            return f"Please tell me those information about the screenings: {next_required_slot.request_template}", READY_TO_PURCHASE(False)
         except NoSlotsToRequest:
             pass
         screenings = self._get_screenings()
-        outline, ready_to_purchase = self._generate_outline_for_screenings(screenings)
-        response = nlg.rewrite_outline(outline)
-        return response, ready_to_purchase
+        return self._generate_outline_for_screenings(screenings)
 
     def generate_suggestions_outline(self) -> str:
         if self.suggestions_already_made:

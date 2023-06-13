@@ -1,5 +1,3 @@
-from typing import List, Dict
-
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dst.dst_module import DSTModule, STATE_CHANGED
 from app.core.chat.dst.intent_detection import AbstractIntentDetectionModule
@@ -40,7 +38,8 @@ class DialogueLoop:
                 self.reset_main_path()
                 return "I see you want to do something different... What do you want to do right now then?"
             self._update_current_state()
-            response = next(self._path_iterator)
+            outline = next(self._path_iterator)
+            response = self.nlg.rewrite_outline(outline, user_message=self._current_message)
             self._last_response = response
             return response
         except ChatProcessingException:
@@ -72,16 +71,14 @@ class DialogueLoop:
         ready_to_purchase = False
         while True:
             while not ready_to_purchase:
-                print(f"Waiting for the system to be ready for purchase {self._current_intent}")
-                response, ready_to_purchase = book_ticket_state.generate_next_response(self.nlg)
+                response, ready_to_purchase = book_ticket_state.generate_next_response()
                 yield response
-            print(f"I think that the user responded with {self._current_intent}")
             # System is ready to make a purchase
             if self._current_intent is IntentEnum.AFFIRMATIVE:
-                yield "You are a happy owner of a ticket"
+                yield "Sure, I bought the ticket that you asked for."
                 return
             else:
-                response, ready_to_purchase = book_ticket_state.generate_next_response(self.nlg)
+                response, ready_to_purchase = book_ticket_state.generate_next_response()
                 yield "Okay, I won't buy this ticket unless you say so. " + response
 
     def _see_booking_path_gen(self):
