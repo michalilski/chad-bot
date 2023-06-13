@@ -10,7 +10,7 @@ class UnknownState(TaskState):
         super().__init__([])
 
     def generate_next_response(self, nlg: NLG) -> str:
-        return "I'm sorry I dont understand. Im in unknown state. Patch me :x"
+        return "This is a bug. Should not be called."
 
-    def generate_suggestions(self, nlg: NLG) -> str:
-        return "Tell me dyour deepest desires. Maybe that will help. Im unknown state."
+    def generate_suggestions_outline(self) -> str:
+        return "This is a bug. Should not be called."

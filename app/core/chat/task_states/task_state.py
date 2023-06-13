@@ -36,11 +36,7 @@ class TaskState:
         return [f"{slot.name} ({slot.description})" for slot in self.slots]
 
     @abstractmethod
-    def generate_next_response(self, nlg: NLG) -> str:
-        pass
-
-    @abstractmethod
-    def generate_suggestions(self, nlg: NLG) -> str:
+    def generate_suggestions_outline(self) -> str:
         pass
 
     def _get_next_empty_required_slot(self) -> SlotMapping:

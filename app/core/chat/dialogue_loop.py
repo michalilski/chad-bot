@@ -1,7 +1,5 @@
-from typing import Dict, List
-
 from app.core.chat.dialogue_structs.intent import IntentEnum
-from app.core.chat.dst.dst_module import DSTModule
+from app.core.chat.dst.dst_module import STATE_CHANGED, DSTModule
 from app.core.chat.dst.intent_detection import AbstractIntentDetectionModule
 from app.core.chat.nlg.nlg import NLG
 from app.core.chat.task_states import BookTicketState, TaskState
@@ -40,24 +38,25 @@ class DialogueLoop:
                 self.reset_main_path()
                 return "I see you want to do something different... What do you want to do right now then?"
             self._update_current_state()
-            response = next(self._path_iterator)
+            outline = next(self._path_iterator)
+            response = self.nlg.rewrite_outline(outline, user_message=self._current_message)
             self._last_response = response
             return response
         except ChatProcessingException:
             return PROCESSING_ERROR_MESSAGE
         except StopIteration:
             self.reset_main_path()
-            return "No problems can I help you with something else?"
+            return self.step(message)
 
-    def _update_current_state(self):
-        self.dst.update_state(self._current_message, self._current_state)
+    def _update_current_state(self) -> STATE_CHANGED:
+        return self.dst.update_state(self._current_message, self._current_state)
 
     def _main_path_gen(self, greet_user=True):
         if greet_user:
             yield "Hi! How can I help you?"
 
         while self._current_intent is IntentEnum.UNKNOWN:
-            yield "I'm sorry, I did not understand that. I can help you with xxxxx..."
+            yield "Is there anything I can help you with?"
 
         if self._current_intent is IntentEnum.BOOK_TICKETS:
             yield from self._book_ticket_path_gen()
@@ -69,16 +68,18 @@ class DialogueLoop:
         self._current_state = book_ticket_state
         self._update_current_state()
 
-        # TODO: obviously, add an exit condition
+        ready_to_purchase = False
         while True:
-            if self._current_intent is IntentEnum.BOOK_TICKETS:
-                yield book_ticket_state.generate_next_response(self.nlg)
-            elif self._current_intent is IntentEnum.AFFIRMATIVE:
-                yield "YOU ARE A HAPPY OWNER OF THE TICKET!"
+            while not ready_to_purchase:
+                response, ready_to_purchase = book_ticket_state.generate_next_response()
+                yield response
+            # System is ready to make a purchase
+            if self._current_intent is IntentEnum.AFFIRMATIVE:
+                yield "Sure, I bought the ticket that you asked for."
                 return
-            elif self._current_intent is IntentEnum.NEGATIVE:
-                yield "No ticket for you then lol!"
-                return
+            else:
+                response, ready_to_purchase = book_ticket_state.generate_next_response()
+                yield "Okay, I won't buy this ticket unless you say so. " + response
 
     def _see_booking_path_gen(self):
         yield "NOT YET IMPLEMENTED"
