@@ -1,20 +1,20 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dst.dst_module import DSTModule
 from app.core.chat.dst.intent_detection import AbstractIntentDetectionModule
 from app.core.chat.nlg.nlg import NLG
-from app.core.chat.task_states import TaskState, BookTicketState
+from app.core.chat.task_states import BookTicketState, TaskState
 from app.core.chat.task_states.unknown_state import UnknownState
 from app.exceptions import PROCESSING_ERROR_MESSAGE, ChatProcessingException
 
 
 class DialogueLoop:
     def __init__(
-            self,
-            dst: DSTModule,
-            intent_detector: AbstractIntentDetectionModule,
-            nlg: NLG,
+        self,
+        dst: DSTModule,
+        intent_detector: AbstractIntentDetectionModule,
+        nlg: NLG,
     ):
         self.dst: DSTModule = dst
         self.intent_detector: AbstractIntentDetectionModule = intent_detector

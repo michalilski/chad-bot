@@ -43,7 +43,7 @@ class ChatGPTResponseProcessor:
     def parse_to_dictionary(cls, text: str) -> Dict[str, Any]:
         try:
             data: Dict[str, Any] = json.loads(text)
-            data = {k: data[k]for k in data if data[k] != "NA"}
+            data = {k: data[k] for k in data if data[k] != "NA"}
         except json.JSONDecodeError:
             logging.error(f"[DST] Could not parse text: {text} to dictionary type.")
             raise ChatProcessingException

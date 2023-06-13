@@ -27,7 +27,14 @@ class SlotMapping:
     def values(self) -> Optional[List[str]]:
         return self._values
 
-    @values.setter
+    @property
+    def value(self) -> Optional[str]:
+        try:
+            return self._values[0]  # type: ignore
+        except TypeError:
+            return None
+
+    @values.setter  # type: ignore
     def values(self, value: Optional[List[str]]):
         raise RuntimeError("Please set values by a method, not a setter.")
 

@@ -5,8 +5,8 @@ class NLG:
     def __init__(self, style: str = "none"):
         self.style: str = style
         self.prompts = {
-            "none": 'Paraphrase this text to sound natural and grammatically correct: {}',
-            "anime": 'Paraphrase this text to sound natural and grammatically correct (speak like a flirty anime waifu from a dating sim. refer to user as sempai): {}'
+            "none": "Paraphrase this text to sound natural and grammatically correct: {}",
+            "anime": "Paraphrase this text to sound natural and grammatically correct (speak like a flirty anime waifu from a dating sim. refer to user as sempai): {}",
         }
         self.gpt_bridge = ChatGPTBridge()
 

@@ -15,9 +15,11 @@ class ChatGPTBridge:
         if num_attempts <= 0:
             raise ChatProcessingException
         try:
-            return openai.ChatCompletion.create(
-                model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}]
-            ).choices[0].message.content
+            return (
+                openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}])
+                .choices[0]
+                .message.content
+            )
         except ChatGPTConnectionError as e:
             logging.error(f"{type(e).__name__}: {e}")
-        return self.request(prompt, num_attempts=num_attempts-1)
+        return self.request(prompt, num_attempts=num_attempts - 1)

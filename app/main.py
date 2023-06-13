@@ -12,12 +12,10 @@ with gr.Blocks() as demo:
         NLG(),
     )
 
-
     def respond(message, chat_history):
         bot_message = dialogue_loop.step(message)
         chat_history.append((message, bot_message))
         return "", chat_history
-
 
     chatbot = gr.Chatbot()
     chatbot.style(height=750)
