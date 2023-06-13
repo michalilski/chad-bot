@@ -67,10 +67,10 @@ class BookTicketState(TaskState):
             )
         except NoSlotsToRequest:
             pass
-        filled_slots: List[SlotMapping] = self._get_all_filled_slots()
-        criteria = ". ".join(slot.info_template for slot in filled_slots)
-        screenings = ["Titanic 2 from 2013", "The Bible Rebuild from 1995"]  # TODO: Michał zrób z bazy danych
+        screenings = self._get_acreenings()
         screenings_text = ". ".join(f"Movie {i + 1}: {text}" for i, text in enumerate(screenings))
+
+        criteria = ". ".join(slot.info_template for slot in self._get_all_filled_slots())
         response = nlg.rewrite_outline(
             f"According to the criteria you asked for: {criteria} I found the following screenings:"
             f"{screenings_text}"
@@ -96,3 +96,7 @@ class BookTicketState(TaskState):
             response = f"{response} {suggestions}"
             self.suggestions_already_made = True
         return response
+
+    def _get_acreenings(self):
+        # TODO: @michał implement query to to the database.
+        return ["Titanic 2 from 2013", "The Bible Rebuild from 1995"]
