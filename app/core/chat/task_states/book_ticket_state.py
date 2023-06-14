@@ -3,12 +3,18 @@ from typing import List, Tuple
 
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
 from app.core.chat.task_states.task_state import NoSlotsToRequest, NoSlotsToSuggest, TaskState
+from app.core.db.db_bridge import DatabaseBridge
+from app.core.db.models import Show
 
 READY_TO_PURCHASE = bool
 
 
 @dataclass
 class BookTicketState(TaskState):
+    suggestions_already_made: bool = False
+    matching_title_threshold: int = 50
+    query_limit: int = 5
+
     def __init__(self):
         super().__init__(
             [
@@ -41,13 +47,6 @@ class BookTicketState(TaskState):
                     is_required=False,
                 ),
                 SlotMapping(
-                    name="date",
-                    description="the date of the screening of the movie",
-                    _info_template="The screening happens on {}",
-                    _request_template="What is the date of the screening of the movie?",
-                    is_required=False,
-                ),
-                SlotMapping(
                     name="genre",
                     description="genre of the movie",
                     _info_template="The movie is a {}",
@@ -56,7 +55,8 @@ class BookTicketState(TaskState):
                 ),
             ]
         )
-        self.suggestions_already_made = False
+        self.db_bridge: DatabaseBridge = DatabaseBridge()
+        self.movie_titles: Tuple[str, ...] = self.db_bridge.fetch_movie_titles()
 
     def generate_next_response(self) -> Tuple[str, READY_TO_PURCHASE]:
         if self["title"].is_empty and self["date"].is_empty:
@@ -91,13 +91,19 @@ class BookTicketState(TaskState):
         self.suggestions_already_made = True
         return suggestions_outline
 
-    def _get_screenings(self) -> List[str]:
-        # TODO: @michał implement query to to the database.
-        return ["Titanic 2 from 2013"]
-        return []
-        return ["Titanic 2 from 2013", "The Bible Rebuild from 1995"]
+    def _get_screenings(self) -> List[Show]:
+        return self.db_bridge.get_screenings(
+            title=self["title"].value,
+            genre=self["genre"].value,
+            date=self["date"].value,
+            from_hour=self["from_hour"].value,
+            to_hour=self["to_hour"].value,
+            possible_movie_titles=self.movie_titles,
+            matching_title_threshold=self.matching_title_threshold,
+            query_limit=self.query_limit,
+        )
 
-    def _generate_outline_for_screenings(self, screenings: List[str]) -> Tuple[str, READY_TO_PURCHASE]:
+    def _generate_outline_for_screenings(self, screenings: List[Show]) -> Tuple[str, READY_TO_PURCHASE]:
         criteria = ". ".join(slot.info_template for slot in self._get_all_filled_slots())
 
         if len(screenings) == 0:

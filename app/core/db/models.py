@@ -24,6 +24,9 @@ class Show(Base):
 
     movie = relationship("Movie", foreign_keys="Show.movie_id", lazy="joined")
 
+    def __str__(self):
+        return f"{self.movie.title} on {self.show_time}"
+
 
 class Ticket(Base):
     __tablename__ = "tickets"
