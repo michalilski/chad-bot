@@ -74,7 +74,7 @@ def export_movies_to_csv(path, movies):
         writer = csv.writer(file)
         writer.writerow(columns)
         for idx, movie in movies.items():
-            writer.writerow((idx, movie["title"], movie["director"], movie["year"], movie["genre"]))
+            writer.writerow((idx, movie["movie_title"], movie["director"], movie["year"], movie["movie_genre"]))
 
 
 def export_schedule_to_csv(path, schedule):

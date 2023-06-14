@@ -19,14 +19,14 @@ class BookTicketState(TaskState):
         super().__init__(
             [
                 SlotMapping(
-                    name="title",
+                    name="movie_title",
                     description="the title of the movie",
                     _info_template="The movie is called {}",
                     _request_template="Which movie are you interested in?",
                     is_required=False,
                 ),
                 SlotMapping(
-                    name="date",
+                    name="movie_date",
                     description="the date of the screening of the movie",
                     _info_template="The screening happens on {}",
                     _request_template="What is the date of the screening of the movie?",
@@ -47,7 +47,7 @@ class BookTicketState(TaskState):
                     is_required=False,
                 ),
                 SlotMapping(
-                    name="genre",
+                    name="movie_genre",
                     description="genre of the movie",
                     _info_template="The movie is a {}",
                     _request_template="What genre of movies do you want to list?",
@@ -59,7 +59,7 @@ class BookTicketState(TaskState):
         self.movie_titles: Tuple[str, ...] = self.db_bridge.fetch_movie_titles()
 
     def generate_next_response(self) -> Tuple[str, READY_TO_PURCHASE]:
-        if self["title"].is_empty and self["date"].is_empty:
+        if self["movie_title"].is_empty and self["movie_date"].is_empty:
             return (
                 "I need you to provide either a name of the movie or when you want to watch the movie.",
                 READY_TO_PURCHASE(False),
@@ -93,9 +93,9 @@ class BookTicketState(TaskState):
 
     def _get_screenings(self) -> List[Show]:
         return self.db_bridge.get_screenings(
-            title=self["title"].value,
-            genre=self["genre"].value,
-            date=self["date"].value,
+            title=self["movie_title"].value,
+            genre=self["movie_genre"].value,
+            date=self["movie_date"].value,
             from_hour=self["from_hour"].value,
             to_hour=self["to_hour"].value,
             possible_movie_titles=self.movie_titles,
@@ -116,7 +116,7 @@ class BookTicketState(TaskState):
                 f"The screening I found for your criteria is {screenings[0]}. Do you want me to book you a ticket for this movie?",
                 READY_TO_PURCHASE(True),
             )
-        screenings_text = ". ".join(f"Movie {i + 1}: {text}" for i, text in enumerate(screenings))
+        screenings_text = ", ".join(f"{i + 1}: {text}" for i, text in enumerate(screenings))
         outline = (
             f"According to the criteria you asked for: {criteria} I found the following screenings:"
             f"{screenings_text} "

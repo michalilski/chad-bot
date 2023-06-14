@@ -1,3 +1,5 @@
+import logging
+
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dst.dst_module import STATE_CHANGED, DSTModule
 from app.core.chat.dst.intent_detection import AbstractIntentDetectionModule
@@ -9,10 +11,10 @@ from app.exceptions import PROCESSING_ERROR_MESSAGE, ChatProcessingException
 
 class DialogueLoop:
     def __init__(
-        self,
-        dst: DSTModule,
-        intent_detector: AbstractIntentDetectionModule,
-        nlg: NLG,
+            self,
+            dst: DSTModule,
+            intent_detector: AbstractIntentDetectionModule,
+            nlg: NLG,
     ):
         self.dst: DSTModule = dst
         self.intent_detector: AbstractIntentDetectionModule = intent_detector
@@ -21,7 +23,7 @@ class DialogueLoop:
         self._current_intent: IntentEnum = IntentEnum.UNKNOWN
         self._current_state: TaskState = UnknownState()
         self._current_message: str = ""
-        self._last_response: str = ""
+        self._last_system_response: str = ""
         self._path_iterator = iter(self._main_path_gen(greet_user=False))
 
     def reset_main_path(self, greet_user: bool = False):
@@ -40,7 +42,7 @@ class DialogueLoop:
             self._update_current_state()
             outline = next(self._path_iterator)
             response = self.nlg.rewrite_outline(outline, user_message=self._current_message)
-            self._last_response = response
+            self._last_system_response = response
             return response
         except ChatProcessingException:
             return PROCESSING_ERROR_MESSAGE
@@ -49,7 +51,9 @@ class DialogueLoop:
             return self.step(message)
 
     def _update_current_state(self) -> STATE_CHANGED:
-        return self.dst.update_state(self._current_message, self._current_state)
+        return self.dst.update_state(
+            system_utterance=self._last_system_response, user_utterance=self._current_message, state=self._current_state
+        )
 
     def _main_path_gen(self, greet_user=True):
         if greet_user:
@@ -83,3 +87,4 @@ class DialogueLoop:
 
     def _see_booking_path_gen(self):
         yield "NOT YET IMPLEMENTED"
+
