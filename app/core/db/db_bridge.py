@@ -20,14 +20,14 @@ class DatabaseBridge:
 
     @staticmethod
     def get_screenings(
-            title: Optional[str],
-            genre: Optional[str],
-            date: Optional[str],
-            from_hour: Optional[str],
-            to_hour: Optional[str],
-            possible_movie_titles: Tuple[str, ...],
-            matching_title_threshold: int = 50,
-            query_limit: int = 5,
+        title: Optional[str],
+        genre: Optional[str],
+        date: Optional[str],
+        from_hour: Optional[str],
+        to_hour: Optional[str],
+        possible_movie_titles: Tuple[str, ...],
+        matching_title_threshold: int = 50,
+        query_limit: int = 5,
     ) -> List[Show]:
         filters: List[bool] = []
         if title is not None:
@@ -64,12 +64,12 @@ class DatabaseBridge:
     @staticmethod
     def get_bookings_for_pin(pin: str) -> List[Ticket]:
         try:
-            pin = int(pin)
+            parsed_pin: int = int(pin)
         except ValueError:
             logging.warning(f"Cannot parse pin {pin}")
             return []
         with Session() as session:
-            results = session.query(Ticket).filter(Ticket.pin == pin).limit(10)
+            results = session.query(Ticket).filter(Ticket.pin == parsed_pin).limit(10)
         return [ticket for ticket in results]
 
     @staticmethod

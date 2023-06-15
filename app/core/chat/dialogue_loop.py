@@ -14,10 +14,10 @@ from app.exceptions import PROCESSING_ERROR_MESSAGE, ChatProcessingException
 
 class DialogueLoop:
     def __init__(
-            self,
-            dst: DSTModule,
-            intent_detector: AbstractIntentDetectionModule,
-            nlg: NLG,
+        self,
+        dst: DSTModule,
+        intent_detector: AbstractIntentDetectionModule,
+        nlg: NLG,
     ):
         self.dst: DSTModule = dst
         self.intent_detector: AbstractIntentDetectionModule = intent_detector

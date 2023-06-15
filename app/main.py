@@ -16,9 +16,7 @@ def build_chatbot(nlg: NLG):
     )
 
     def get_all_tickets_df():
-        return pd.DataFrame.from_records(
-            [ticket.to_dict() for ticket in DatabaseBridge.get_all_bookings()]
-        )
+        return pd.DataFrame.from_records([ticket.to_dict() for ticket in DatabaseBridge.get_all_bookings()])
 
     def respond(message, chat_history):
         bot_message = dialogue_loop.step(message)
@@ -31,7 +29,11 @@ def build_chatbot(nlg: NLG):
     clear = gr.Button("Clear")
     gr.Label("Behind The Scenes", label=None)
     gr_tickets_table = gr.Dataframe(
-        row_count=(1, "dynamic"), col_count=(3, "fixed"), label="Tickets in database", headers=["movie", "date", "pin"], value=get_all_tickets_df()
+        row_count=(1, "dynamic"),
+        col_count=(3, "fixed"),
+        label="Tickets in database",
+        headers=["movie", "date", "pin"],
+        value=get_all_tickets_df(),
     )
 
     msg.submit(respond, [msg, chatbot], [msg, chatbot, gr_tickets_table])

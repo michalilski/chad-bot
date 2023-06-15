@@ -44,7 +44,7 @@ class ChatGPTResponseProcessor:
     @classmethod
     def parse_to_dictionary(cls, text: str) -> Dict[str, Any]:
         try:
-            text = text[text.index("{"):text.index("}")+1]
+            text = text[text.index("{") : text.index("}") + 1]
             data: Dict[str, Any] = json.loads(text)
             data = {k: data[k] for k in data if data[k] != "NA"}
             logging.warn(data)

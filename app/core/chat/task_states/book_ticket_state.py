@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
 from app.core.chat.task_states.task_state import NoSlotsToRequest, NoSlotsToSuggest, TaskState
