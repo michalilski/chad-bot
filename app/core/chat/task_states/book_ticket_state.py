@@ -1,12 +1,24 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
 from app.core.chat.task_states.task_state import NoSlotsToRequest, NoSlotsToSuggest, TaskState
 from app.core.db.db_bridge import DatabaseBridge
 from app.core.db.models import Show
 
-READY_TO_PURCHASE = bool
+
+@dataclass
+class ReadyToPurchase:
+    screening: Optional[Show]
+
+    def __bool__(self):
+        return self.screening is not None
+
+    @classmethod
+    def not_ready(cls) -> ReadyToPurchase:
+        return ReadyToPurchase(None)
 
 
 @dataclass
@@ -20,14 +32,14 @@ class BookTicketState(TaskState):
             [
                 SlotMapping(
                     name="movie_title",
-                    description="the title of the movie",
+                    description="title of the movie that the user want to buy ticket for",
                     _info_template="The movie is called {}",
                     _request_template="Which movie are you interested in?",
                     is_required=False,
                 ),
                 SlotMapping(
                     name="movie_date",
-                    description="the date of the screening of the movie",
+                    description="the date of the screening of the movie that the user want to buy ticket for",
                     _info_template="The screening happens on {}",
                     _request_template="What is the date of the screening of the movie?",
                     is_required=False,
@@ -48,27 +60,26 @@ class BookTicketState(TaskState):
                 ),
                 SlotMapping(
                     name="movie_genre",
-                    description="genre of the movie",
+                    description="genre of the movie that the user want to buy ticket for",
                     _info_template="The movie is a {}",
                     _request_template="What genre of movies do you want to list?",
                     is_required=False,
                 ),
             ]
         )
-        self.db_bridge: DatabaseBridge = DatabaseBridge()
-        self.movie_titles: Tuple[str, ...] = self.db_bridge.fetch_movie_titles()
+        self.movie_titles: Tuple[str, ...] = DatabaseBridge.fetch_movie_titles()
 
-    def generate_next_response(self) -> Tuple[str, READY_TO_PURCHASE]:
+    def generate_next_response(self) -> Tuple[str, ReadyToPurchase]:
         if self["movie_title"].is_empty and self["movie_date"].is_empty:
             return (
                 "I need you to provide either a name of the movie or when you want to watch the movie.",
-                READY_TO_PURCHASE(False),
+                ReadyToPurchase.not_ready(),
             )
         try:
             next_required_slot: SlotMapping = self._get_next_empty_required_slot()
             return (
                 f"Please tell me those information about the screenings: {next_required_slot.request_template}",
-                READY_TO_PURCHASE(False),
+                ReadyToPurchase.not_ready(),
             )
         except NoSlotsToRequest:
             pass
@@ -92,7 +103,7 @@ class BookTicketState(TaskState):
         return suggestions_outline
 
     def _get_screenings(self) -> List[Show]:
-        return self.db_bridge.get_screenings(
+        return DatabaseBridge.get_screenings(
             title=self["movie_title"].value,
             genre=self["movie_genre"].value,
             date=self["movie_date"].value,
@@ -103,18 +114,18 @@ class BookTicketState(TaskState):
             query_limit=self.query_limit,
         )
 
-    def _generate_outline_for_screenings(self, screenings: List[Show]) -> Tuple[str, READY_TO_PURCHASE]:
+    def _generate_outline_for_screenings(self, screenings: List[Show]) -> Tuple[str, ReadyToPurchase]:
         criteria = ". ".join(slot.info_template for slot in self._get_all_filled_slots())
 
         if len(screenings) == 0:
             return (
                 f"Unfortunately there are no screenings meeting your criteria: {criteria}. Please update your criteria. {self.generate_suggestions_outline()}",
-                READY_TO_PURCHASE(False),
+                ReadyToPurchase.not_ready(),
             )
         if len(screenings) == 1:
             return (
                 f"The screening I found for your criteria is {screenings[0]}. Do you want me to book you a ticket for this movie?",
-                READY_TO_PURCHASE(True),
+                ReadyToPurchase(screenings[0]),
             )
         screenings_text = ", ".join(f"{i + 1}: {text}" for i, text in enumerate(screenings))
         outline = (
@@ -123,4 +134,4 @@ class BookTicketState(TaskState):
             "Which one would you like to book a ticket for? "
             f"{self.generate_suggestions_outline()}"
         )
-        return outline, READY_TO_PURCHASE(False)
+        return outline, ReadyToPurchase.not_ready()

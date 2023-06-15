@@ -7,5 +7,5 @@ class IntentEnum(Enum):
     # GIVE_SUGGESTIONS = "provide user with information on what he can do or ask for"
     AFFIRMATIVE = "user responds in the affirmative"
     # NEGATIVE = "user responds in the negative or does not want what was suggested to him"
-    CANCEL_PROCEDURE = "user wants to do something different"
+    # CANCEL_PROCEDURE = "user wants to do something different"
     UNKNOWN = "unknown intent"

@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 from typing import List, Optional, Tuple
 
@@ -5,26 +6,27 @@ from fuzzywuzzy import fuzz
 from sqlalchemy import func
 
 from app.core.db.engine import Session
-from app.core.db.models import Movie, Show
+from app.core.db.models import Movie, Show, Ticket
 from app.core.db.utils import parse_time
 
 
 class DatabaseBridge:
-    def fetch_movie_titles(self) -> Tuple[str, ...]:
+    @staticmethod
+    def fetch_movie_titles() -> Tuple[str, ...]:
         with Session() as session:
             movies: Tuple[str, ...] = tuple(res[0] for res in session.query(Movie.title).all())
         return movies
 
+    @staticmethod
     def get_screenings(
-        self,
-        title: Optional[str],
-        genre: Optional[str],
-        date: Optional[str],
-        from_hour: Optional[str],
-        to_hour: Optional[str],
-        possible_movie_titles: Tuple[str, ...],
-        matching_title_threshold: int = 50,
-        query_limit: int = 5,
+            title: Optional[str],
+            genre: Optional[str],
+            date: Optional[str],
+            from_hour: Optional[str],
+            to_hour: Optional[str],
+            possible_movie_titles: Tuple[str, ...],
+            matching_title_threshold: int = 50,
+            query_limit: int = 5,
     ) -> List[Show]:
         filters: List[bool] = []
         if title is not None:
@@ -49,3 +51,24 @@ class DatabaseBridge:
             results = session.query(Show).join(Movie).filter(*filters).limit(query_limit)
 
         return [show for show in results]
+
+    @staticmethod
+    def book_ticket(show: Show) -> Ticket:
+        ticket = Ticket(show_id=show.id, seat_number=13, pin=random.randint(1000, 9999))
+        with Session() as db_session:
+            db_session.add(ticket)
+            db_session.commit()
+        return ticket
+
+    @staticmethod
+    def get_bookings_for_pin(pin: int) -> List[Ticket]:
+        with Session() as session:
+            results = session.query(Ticket).join(Movie).filter(Ticket.pin == pin)
+        return [ticket for ticket in results]
+
+    @staticmethod
+    def get_all_bookings() -> List[Ticket]:
+        with Session() as session:
+            results = session.query(Ticket).limit(10)
+        return [ticket for ticket in results]
+

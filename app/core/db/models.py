@@ -30,9 +30,12 @@ class Show(Base):
 
 class Ticket(Base):
     __tablename__ = "tickets"
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     show_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey(Show.id))
     seat_number = sqlalchemy.Column(sqlalchemy.Integer)
     pin = sqlalchemy.Column(sqlalchemy.Integer)
 
     show = relationship("Show", foreign_keys="Ticket.show_id", lazy="joined")
+
+    def __str__(self):
+        return f"Ticket for {self.show}"
