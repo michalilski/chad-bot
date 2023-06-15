@@ -23,7 +23,6 @@ class ReadyToPurchase:
 
 @dataclass
 class BookTicketState(TaskState):
-    suggestions_already_made: bool = False
     matching_title_threshold: int = 50
     query_limit: int = 5
 
@@ -68,6 +67,7 @@ class BookTicketState(TaskState):
             ]
         )
         self.movie_titles: Tuple[str, ...] = DatabaseBridge.fetch_movie_titles()
+        self.suggestions_already_made: bool = False
 
     def generate_next_response(self) -> Tuple[str, ReadyToPurchase]:
         if self["movie_title"].is_empty and self["movie_date"].is_empty:

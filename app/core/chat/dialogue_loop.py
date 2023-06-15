@@ -6,6 +6,7 @@ from app.core.chat.dst.intent_detection import AbstractIntentDetectionModule
 from app.core.chat.nlg.nlg import NLG
 from app.core.chat.task_states import BookTicketState, TaskState
 from app.core.chat.task_states.book_ticket_state import ReadyToPurchase
+from app.core.chat.task_states.manage_booking_state import ManageBookingState
 from app.core.chat.task_states.unknown_state import UnknownState
 from app.core.db.db_bridge import DatabaseBridge
 from app.exceptions import PROCESSING_ERROR_MESSAGE, ChatProcessingException
@@ -94,7 +95,11 @@ class DialogueLoop:
                 yield "Okay, I won't buy this ticket unless you say so. " + response
 
     def _see_booking_path_gen(self):
-        # TODO: request pin
-        tickets = DatabaseBridge.get_all_bookings()
-        tickets = ", ".join(str(ticket) for ticket in tickets)
-        yield f"You have tickets booked for the following screenings: \"{tickets}\""
+        manage_booking_state: ManageBookingState = ManageBookingState()
+        self._current_state = manage_booking_state
+        self._update_current_state()
+
+        while True:
+            # TODO: exit condition
+            response = manage_booking_state.generate_next_response()
+            yield response

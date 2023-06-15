@@ -1,3 +1,4 @@
+import logging
 import random
 from datetime import datetime
 from typing import List, Optional, Tuple
@@ -61,9 +62,14 @@ class DatabaseBridge:
         return ticket
 
     @staticmethod
-    def get_bookings_for_pin(pin: int) -> List[Ticket]:
+    def get_bookings_for_pin(pin: str) -> List[Ticket]:
+        try:
+            pin = int(pin)
+        except ValueError:
+            logging.warning(f"Cannot parse pin {pin}")
+            return []
         with Session() as session:
-            results = session.query(Ticket).join(Movie).filter(Ticket.pin == pin)
+            results = session.query(Ticket).filter(Ticket.pin == pin).limit(10)
         return [ticket for ticket in results]
 
     @staticmethod
@@ -71,4 +77,3 @@ class DatabaseBridge:
         with Session() as session:
             results = session.query(Ticket).limit(10)
         return [ticket for ticket in results]
-

@@ -39,3 +39,10 @@ class Ticket(Base):
 
     def __str__(self):
         return f"Ticket for {self.show}"
+
+    def to_dict(self):
+        return {
+            "title": self.show.movie.title,
+            "date": self.show.show_time,
+            "pin": self.pin,
+        }
