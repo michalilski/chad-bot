@@ -20,14 +20,14 @@ class DatabaseBridge:
 
     @staticmethod
     def get_screenings(
-        title: Optional[str],
-        genre: Optional[str],
-        date: Optional[str],
-        from_hour: Optional[str],
-        to_hour: Optional[str],
-        possible_movie_titles: Tuple[str, ...],
-        matching_title_threshold: int = 50,
-        query_limit: int = 5,
+            title: Optional[str],
+            genre: Optional[str],
+            date: Optional[str],
+            from_hour: Optional[str],
+            to_hour: Optional[str],
+            possible_movie_titles: Tuple[str, ...],
+            matching_title_threshold: int = 50,
+            query_limit: int = 5,
     ) -> List[Show]:
         filters: List[bool] = []
         if title is not None:
@@ -77,3 +77,15 @@ class DatabaseBridge:
         with Session() as session:
             results = session.query(Ticket).limit(10)
         return [ticket for ticket in results]
+
+    @staticmethod
+    def cancel_ticket(pin: str) -> Optional[Ticket]:
+        tickets: List[Ticket] = DatabaseBridge.get_bookings_for_pin(pin)
+        if not tickets:
+            return None
+        ticket = tickets[-1]
+        with Session() as db_session:
+            ticket = db_session.merge(ticket)
+            db_session.delete(ticket)
+            db_session.commit()
+        return ticket

@@ -1,13 +1,10 @@
 import base64
-from io import BytesIO
+from pathlib import Path
 
 import gradio as gr
 import pandas as pd
-from TTS.api import TTS
-from gtts import gTTS
-from uuid import uuid4
 import soundfile as sf
-from pathlib import Path
+from TTS.api import TTS
 
 from app.core.chat import DialogueLoop
 from app.core.chat.dst.dst_module import DSTModule
@@ -15,7 +12,13 @@ from app.core.chat.dst.intent_detection import ChatGPTBasedIntentDetectionModule
 from app.core.chat.nlg.nlg import NLG
 from app.core.db.db_bridge import DatabaseBridge
 
-tts = TTS(model_name="tts_models/en/ljspeech/tacotron2-DDC", progress_bar=True, gpu=False)
+tts = TTS(
+    model_name="tts_models/en/ljspeech/tacotron2-DDC",
+    vocoder_path="vocoder_models/en/sam/hifigan_v2",
+    progress_bar=True,
+    gpu=True
+)
+
 audio_output_path = Path("data/audio") / "generated_response_audio.wav"
 
 
