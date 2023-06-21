@@ -4,6 +4,7 @@ from pathlib import Path
 import gradio as gr
 import pandas as pd
 import soundfile as sf
+from freezegun import freeze_time
 from TTS.api import TTS
 
 from app.core.chat import DialogueLoop
@@ -23,11 +24,14 @@ audio_output_path = Path("data/audio") / "generated_response_audio.wav"
 
 
 def build_chatbot(nlg: NLG):
-    dialogue_loop: DialogueLoop = DialogueLoop(
-        DSTModule(),
-        ChatGPTBasedIntentDetectionModule(),
-        nlg,
-    )
+    def setup_loop():
+        global dialogue_loop
+        dialogue_loop = DialogueLoop(
+            DSTModule(),
+            ChatGPTBasedIntentDetectionModule(),
+            nlg,
+        )
+        return respond("Explain how you can help me.", [])[1]
 
     def get_all_tickets_df():
         return pd.DataFrame.from_records([ticket.to_dict() for ticket in DatabaseBridge.get_all_bookings()])
@@ -50,6 +54,7 @@ def build_chatbot(nlg: NLG):
         chat_history.append((message, bot_response))
         return "", chat_history, get_all_tickets_df(), text_to_speech_html(bot_response), get_state()
 
+    setup_loop()
     chatbot = gr.Chatbot(value=respond("Explain how you can help me.", [])[1])
     chatbot.style(height=750)
     msg = gr.Textbox(label="Input")
@@ -75,7 +80,7 @@ def build_chatbot(nlg: NLG):
     )
 
     msg.submit(respond, [msg, chatbot], [msg, chatbot, gr_tickets_table, audio_html, state_table])
-    clear.click(lambda: None, None, chatbot, queue=False)
+    clear.click(setup_loop, None, chatbot, queue=False)
 
 
 def update_nlg_style(nlg: NLG, nlg_style: str):
@@ -83,12 +88,13 @@ def update_nlg_style(nlg: NLG, nlg_style: str):
     nlg.style = nlg_style
 
 
-with gr.Blocks() as demo:
-    nlg = NLG()
-    nlg_styles = list(nlg.PROMPTS_WITH_USER_MESSAGE.keys())
-    dropdown = gr.Dropdown(nlg_styles, value=nlg_styles[0], label="Response style")
-    dropdown.change(fn=lambda nlg_style: update_nlg_style(nlg, nlg_style), inputs=[dropdown])
-    build_chatbot(nlg)
-    demo.launch(
-        server_name="0.0.0.0", debug=True, prevent_thread_lock=False, inbrowser=False, ssl_verify=False
-    )  # share=True when app is ready
+with freeze_time("2023-07-01"):
+    with gr.Blocks() as demo:
+        nlg = NLG()
+        nlg_styles = list(nlg.PROMPTS_WITH_USER_MESSAGE.keys())
+        dropdown = gr.Dropdown(nlg_styles, value=nlg_styles[0], label="Response style")
+        dropdown.change(fn=lambda nlg_style: update_nlg_style(nlg, nlg_style), inputs=[dropdown])
+        build_chatbot(nlg)
+        demo.launch(
+            server_name="0.0.0.0", debug=True, prevent_thread_lock=False, inbrowser=False, ssl_verify=False
+        )  # share=True when app is ready
