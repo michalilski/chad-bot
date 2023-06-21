@@ -9,3 +9,4 @@ class IntentEnum(Enum):
     # NEGATIVE = "user responds in the negative or does not want what was suggested to him"
     # CANCEL_PROCEDURE = "user wants to do something different"
     UNKNOWN = "unknown intent"
+    HELP = "explain how you can help the user"

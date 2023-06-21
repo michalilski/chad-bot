@@ -18,12 +18,15 @@ def build_chatbot(nlg: NLG):
     def get_all_tickets_df():
         return pd.DataFrame.from_records([ticket.to_dict() for ticket in DatabaseBridge.get_all_bookings()])
 
+    def get_state():
+        return dialogue_loop._current_state.to_dataframe()
+
     def respond(message, chat_history):
         bot_message = dialogue_loop.step(message)
         chat_history.append((message, bot_message))
-        return "", chat_history, get_all_tickets_df()
+        return "", chat_history, get_all_tickets_df(), get_state()
 
-    chatbot = gr.Chatbot()
+    chatbot = gr.Chatbot(value=respond("Explain how you can help me.", [])[1])
     chatbot.style(height=750)
     msg = gr.Textbox(label="Input")
     clear = gr.Button("Clear")
@@ -36,7 +39,15 @@ def build_chatbot(nlg: NLG):
         value=get_all_tickets_df(),
     )
 
-    msg.submit(respond, [msg, chatbot], [msg, chatbot, gr_tickets_table])
+    state_table = gr.DataFrame(
+        row_count=(1, "dynamic"),
+        col_count=(2, "fixed"),
+        label="Dialogue state",
+        headers=["Slot", "Value"],
+        value=get_state(),
+    )
+
+    msg.submit(respond, [msg, chatbot], [msg, chatbot, gr_tickets_table, state_table])
     clear.click(lambda: None, None, chatbot, queue=False)
 
 

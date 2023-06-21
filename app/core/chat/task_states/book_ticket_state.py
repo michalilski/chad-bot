@@ -87,6 +87,14 @@ class BookTicketState(TaskState):
         return self._generate_outline_for_screenings(screenings)
 
     def generate_suggestions_outline(self) -> str:
+        suggestions_outline: str = (
+            "Currently I am booking a ticket for you."
+            f"Here are the details you already provided {[{slot.description: slot.value} for slot in self._get_all_filled_slots()]}."
+            f"Here are the details you can also provide {[slot.description for slot in self._get_all_empty_slots()]}."
+        )
+        return suggestions_outline
+
+    def generate_empty_slots_suggestions_outline(self) -> str:
         if self.suggestions_already_made:
             return ""
         self.suggestions_already_made = True
@@ -119,7 +127,7 @@ class BookTicketState(TaskState):
 
         if len(screenings) == 0:
             return (
-                f"Unfortunately there are no screenings meeting your criteria: {criteria}. Please update your criteria. {self.generate_suggestions_outline()}",
+                f"Unfortunately there are no screenings meeting your criteria: {criteria}. Please update your criteria. {self.generate_empty_slots_suggestions_outline()}",
                 ReadyToPurchase.not_ready(),
             )
         if len(screenings) == 1:
