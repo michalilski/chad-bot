@@ -51,6 +51,6 @@ class ManageBookingState(TaskState):
         if len(tickets) == 0:
             return (
                 f"There are no tickets booked for pin {pin}. Please make sure your pin is correct.",
-                TaskCompleted(True)
+                TaskCompleted(True),
             )
         return f"Under the pin code {pin} there is a booking for {tickets[-1].show}", TaskCompleted(True)

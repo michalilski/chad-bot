@@ -12,12 +12,20 @@ from app.core.chat.dst.intent_detection import ChatGPTBasedIntentDetectionModule
 from app.core.chat.nlg.nlg import NLG
 from app.core.db.db_bridge import DatabaseBridge
 
-tts = TTS(
-    model_name="tts_models/en/ljspeech/tacotron2-DDC",
-    vocoder_path="vocoder_models/en/sam/hifigan_v2",
-    progress_bar=True,
-    gpu=True,
-)
+_tts = None
+
+
+def get_tts():
+    global _tts
+    if _tts is None:
+        _tts = TTS(
+            model_name="tts_models/en/ljspeech/tacotron2-DDC",
+            vocoder_path="vocoder_models/en/sam/hifigan_v2",
+            progress_bar=True,
+            gpu=True,
+        )
+    return _tts
+
 
 audio_output_path = Path("data/audio") / "generated_response_audio.wav"
 
@@ -33,7 +41,7 @@ def build_chatbot(nlg: NLG):
         return pd.DataFrame.from_records([ticket.to_dict() for ticket in DatabaseBridge.get_all_bookings()])
 
     def text_to_speech_html(text):
-        audio = tts.tts(text=text)
+        audio = get_tts().tts(text=text)
         sf.write(audio_output_path, audio, samplerate=22_050)
 
         with audio_output_path.open("rb") as audio_output_file:
