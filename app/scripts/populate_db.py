@@ -1,12 +1,12 @@
 import csv
 import logging
 
-from app.core.db.engine import db_session
+from app.core.db.engine import Session
 from app.core.db.models import Movie, Show
 from app.settings import PROJECT_PATH
 
 
-def populate_movies(path):
+def populate_movies(path, db_session):
     with open(path) as file:
         reader = csv.reader(file)
         next(reader)
@@ -26,7 +26,7 @@ def populate_movies(path):
             logging.error(e)
 
 
-def populate_movie_shows(path):
+def populate_movie_shows(path, db_session):
     with open(path) as file:
         reader = csv.reader(file)
         next(reader)
@@ -41,9 +41,10 @@ def populate_movie_shows(path):
 
 
 def populate():
-    data_path = PROJECT_PATH / "data" / "csv"
-    populate_movies(data_path / "movies.csv")
-    populate_movie_shows(data_path / "movie_shows.csv")
+    with Session() as db_session:
+        data_path = PROJECT_PATH / "data" / "csv"
+        populate_movies(data_path / "movies.csv", db_session)
+        populate_movie_shows(data_path / "movie_shows.csv", db_session)
 
 
 if __name__ == "__main__":
