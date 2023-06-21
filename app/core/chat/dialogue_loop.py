@@ -1,4 +1,5 @@
 import logging
+from typing import cast
 
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dst.dst_module import STATE_CHANGED, DSTModule
@@ -6,7 +7,7 @@ from app.core.chat.dst.intent_detection import AbstractIntentDetectionModule
 from app.core.chat.nlg.nlg import NLG
 from app.core.chat.task_states import BookTicketState, TaskState
 from app.core.chat.task_states.book_ticket_state import ReadyToPurchase
-from app.core.chat.task_states.manage_booking_state import ManageBookingState, TaksCompleted
+from app.core.chat.task_states.manage_booking_state import ManageBookingState, TaskCompleted
 from app.core.chat.task_states.unknown_state import UnknownState
 from app.core.db.db_bridge import DatabaseBridge
 from app.exceptions import PROCESSING_ERROR_MESSAGE, ChatProcessingException
@@ -101,7 +102,7 @@ class DialogueLoop:
         self._current_state = manage_booking_state
         self._update_current_state()
 
-        task_completed: TaksCompleted(False)
+        task_completed: TaskCompleted = TaskCompleted(False)
         while True:
             response, task_completed = manage_booking_state.generate_next_response()
             if task_completed:
@@ -112,7 +113,8 @@ class DialogueLoop:
         else:
             yield f"Are you sure you want to cancel your reservation for {response}?"
             if self._current_intent is IntentEnum.AFFIRMATIVE:
-                canceled_ticket = DatabaseBridge.cancel_ticket(self._current_state["4_digit_pin"].value)
+                pin: str = cast(str, self._current_state["4_digit_pin"].value)
+                canceled_ticket = DatabaseBridge.cancel_ticket(pin)
                 if canceled_ticket:
                     yield f"Sure. I canceled your {canceled_ticket}. I hope I helped."
                 else:

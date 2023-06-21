@@ -16,7 +16,7 @@ tts = TTS(
     model_name="tts_models/en/ljspeech/tacotron2-DDC",
     vocoder_path="vocoder_models/en/sam/hifigan_v2",
     progress_bar=True,
-    gpu=True
+    gpu=True,
 )
 
 audio_output_path = Path("data/audio") / "generated_response_audio.wav"

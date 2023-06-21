@@ -17,7 +17,9 @@ class ChatGPTBridge:
             raise ChatProcessingException
         try:
             return (
-                openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}], temperature=self.temperature)
+                openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}], temperature=self.temperature
+                )
                 .choices[0]
                 .message.content
             )

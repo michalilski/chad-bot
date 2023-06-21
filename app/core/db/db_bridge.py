@@ -20,14 +20,14 @@ class DatabaseBridge:
 
     @staticmethod
     def get_screenings(
-            title: Optional[str],
-            genre: Optional[str],
-            date: Optional[str],
-            from_hour: Optional[str],
-            to_hour: Optional[str],
-            possible_movie_titles: Tuple[str, ...],
-            matching_title_threshold: int = 50,
-            query_limit: int = 5,
+        title: Optional[str],
+        genre: Optional[str],
+        date: Optional[str],
+        from_hour: Optional[str],
+        to_hour: Optional[str],
+        possible_movie_titles: Tuple[str, ...],
+        matching_title_threshold: int = 50,
+        query_limit: int = 5,
     ) -> List[Show]:
         filters: List[bool] = []
         if title is not None:

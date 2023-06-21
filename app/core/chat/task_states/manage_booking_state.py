@@ -5,8 +5,7 @@ from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
 from app.core.chat.task_states import TaskState
 from app.core.db.db_bridge import DatabaseBridge
 
-
-TaksCompleted = bool
+TaskCompleted = bool
 
 
 @dataclass
@@ -34,18 +33,20 @@ class ManageBookingState(TaskState):
     def generate_suggestions_outline(self) -> str:
         return "You need to provide a pin number in order to manage your booking"
 
-    def generate_next_response(self) -> Tuple[str, TaksCompleted]:
+    def generate_next_response(self) -> Tuple[str, TaskCompleted]:
         try:
             int_pin = self["4_digit_pin"].value
         except ValueError:
             self["4_digit_pin"].set_certain_values([])
 
         if self["4_digit_pin"].is_empty:
-            return "Please give me the pin that you received when booking the ticket", TaksCompleted(False)
+            return "Please give me the pin that you received when booking the ticket", TaskCompleted(False)
 
         pin: str = cast(str, self["4_digit_pin"].value)
         tickets = DatabaseBridge.get_bookings_for_pin(pin)
 
         if len(tickets) == 0:
-            return f"There are no tickets booked for pin {pin}. Please make sure your pin is correct.", TaksCompleted(True)
-        return f"Under the pin code {pin} there is a booking for {tickets[-1].show}", TaksCompleted(True)
+            return f"There are no tickets booked for pin {pin}. Please make sure your pin is correct.", TaskCompleted(
+                True
+            )
+        return f"Under the pin code {pin} there is a booking for {tickets[-1].show}", TaskCompleted(True)
