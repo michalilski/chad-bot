@@ -6,7 +6,7 @@ from app.core.chat.dst.intent_detection import AbstractIntentDetectionModule
 from app.core.chat.nlg.nlg import NLG
 from app.core.chat.task_states import BookTicketState, TaskState
 from app.core.chat.task_states.book_ticket_state import ReadyToPurchase
-from app.core.chat.task_states.manage_booking_state import ManageBookingState
+from app.core.chat.task_states.manage_booking_state import ManageBookingState, TaksCompleted
 from app.core.chat.task_states.unknown_state import UnknownState
 from app.core.db.db_bridge import DatabaseBridge
 from app.exceptions import PROCESSING_ERROR_MESSAGE, ChatProcessingException
@@ -92,14 +92,17 @@ class DialogueLoop:
                 return
             else:
                 response, ready_to_purchase = book_ticket_state.generate_next_response()
-                yield "Okay, I won't buy this ticket unless you say so. " + response
+                yield f"Okay, I won't buy this ticket unless you say so. {response}"
 
     def _see_booking_path_gen(self):
         manage_booking_state: ManageBookingState = ManageBookingState()
         self._current_state = manage_booking_state
         self._update_current_state()
 
+        task_completed: TaksCompleted(False)
         while True:
-            # TODO: exit condition
-            response = manage_booking_state.generate_next_response()
+            response, task_completed = manage_booking_state.generate_next_response()
+            if task_completed:
+                break
             yield response
+        yield f"{response} I hope I helped!"

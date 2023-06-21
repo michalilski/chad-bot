@@ -32,7 +32,7 @@ def build_chatbot(nlg: NLG):
         row_count=(1, "dynamic"),
         col_count=(3, "fixed"),
         label="Tickets in database",
-        headers=["movie", "date", "pin"],
+        headers=["movie", "date", "4_digit_pin"],
         value=get_all_tickets_df(),
     )
 

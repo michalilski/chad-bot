@@ -44,5 +44,5 @@ class Ticket(Base):
         return {
             "title": self.show.movie.title,
             "date": self.show.show_time,
-            "pin": self.pin,
+            "4_digit_pin": self.pin,
         }

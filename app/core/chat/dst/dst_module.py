@@ -11,9 +11,12 @@ STATE_CHANGED = bool
 
 class DSTModule:
     dst_prompt: str = (
-        'Given system utterance "{1}" and a user response: "{2}"'
-        " extract these exact user slot values from [{0}]."
-        ' Return results as a JSON. Fill empty or don\'t care slots as "NA".'
+        "You are a dialogue state tracking tool." 
+        "Extract exact slot values [{0}] from conversiotion with the User (NOT the System) Use last found value."
+        'Return results as a JSON. Fill empty or don\'t care slots as "NA".'
+        'System: "{1}"\n'
+        'User: "{2}"\n'
+        'Response:'
     )
 
     def __init__(self):
@@ -44,11 +47,11 @@ class ChatGPTResponseProcessor:
     @classmethod
     def parse_to_dictionary(cls, text: str) -> Dict[str, Any]:
         try:
-            text = text[text.index("{") : text.index("}") + 1]
+            text = text[text.index("{"): text.index("}") + 1]
             data: Dict[str, Any] = json.loads(text)
             data = {k: data[k] for k in data if data[k] != "NA"}
             logging.warn(data)
         except json.JSONDecodeError:
             logging.error(f"[DST] Could not parse text: {text} to dictionary type.")
-            raise
+            return {}
         return data

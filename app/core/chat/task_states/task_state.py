@@ -33,7 +33,7 @@ class TaskState:
             slot.set_guessed_values(slots_values[slot.name])
 
     def get_slot_names_with_descriptions(self) -> List[str]:
-        return [f"{slot.name} ({slot.description})" for slot in self.slots]
+        return [f"\"{slot.name}\" ({slot.description})" for slot in self.slots]
 
     @abstractmethod
     def generate_suggestions_outline(self) -> str:
