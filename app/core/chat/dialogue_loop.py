@@ -57,7 +57,7 @@ class DialogueLoop:
 
     def _update_current_state(self) -> STATE_CHANGED:
         return self.dst.update_state(
-            system_utterance=self._last_system_response_outline,
+            system_utterance=self._last_system_response,
             user_utterance=self._current_message,
             state=self._current_state,
         )

@@ -18,4 +18,6 @@ class NLG:
 
     def rewrite_outline(self, outline: str, user_message: str) -> str:
         gpt_input = self.PROMPTS_WITH_USER_MESSAGE[self.style].format(user_message, outline)
-        return self.gpt_bridge.request(gpt_input)
+        response = self.gpt_bridge.request(gpt_input)
+        response = response.replace("~", "\\~")
+        return response
