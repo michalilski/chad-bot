@@ -42,12 +42,15 @@ def build_chatbot(nlg: NLG):
         audio_player = f'<audio src="data:audio/mpeg;base64,{audio}" controls autoplay></audio>'
         return audio_player
 
+    def get_state():
+        return dialogue_loop._current_state.to_dataframe()
+
     def respond(message, chat_history):
         bot_response = dialogue_loop.step(message)
         chat_history.append((message, bot_response))
-        return "", chat_history, get_all_tickets_df(), text_to_speech_html(bot_response)
+        return "", chat_history, get_all_tickets_df(), text_to_speech_html(bot_response), get_state()
 
-    chatbot = gr.Chatbot()
+    chatbot = gr.Chatbot(value=respond("Explain how you can help me.", [])[1])
     chatbot.style(height=750)
     msg = gr.Textbox(label="Input")
     clear = gr.Button("Clear")
@@ -63,7 +66,15 @@ def build_chatbot(nlg: NLG):
     audio_html = gr.HTML()
     audio_html.visible = False
 
-    msg.submit(respond, [msg, chatbot], [msg, chatbot, gr_tickets_table, audio_html])
+    state_table = gr.DataFrame(
+        row_count=(1, "dynamic"),
+        col_count=(2, "fixed"),
+        label="Dialogue state",
+        headers=["Slot", "Value"],
+        value=get_state(),
+    )
+
+    msg.submit(respond, [msg, chatbot], [msg, chatbot, gr_tickets_table, audio_html, state_table])
     clear.click(lambda: None, None, chatbot, queue=False)
 
 
@@ -71,13 +82,6 @@ def update_nlg_style(nlg: NLG, nlg_style: str):
     print(f"updating nlg style to {nlg_style}")
     nlg.style = nlg_style
 
-
-# with gr.Blocks() as demo:
-#
-#
-#     text = gr.Text()
-#     btn = gr.Button("OK")
-#     btn.click(text_to_speech, inputs=[text], outputs=[html])
 
 with gr.Blocks() as demo:
     nlg = NLG()

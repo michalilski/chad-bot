@@ -7,3 +7,4 @@ class IntentEnum(Enum):
     CANCEL_BOOKING = "user want to cancel his already booked ticket"
     AFFIRMATIVE = "user responds in the affirmative"
     UNKNOWN = "unknown intent"
+    HELP = "explain how you can help the user"

@@ -39,13 +39,15 @@ class DialogueLoop:
         try:
             self._current_message = message
             detected_intent: IntentEnum = self.intent_detector.recognize_intent(message)
-            if detected_intent is not IntentEnum.UNKNOWN:
+
+            if not detected_intent in (IntentEnum.UNKNOWN, IntentEnum.HELP):
                 self._current_intent = detected_intent
-            # if detected_intent is IntentEnum.CANCEL_PROCEDURE:
-            #     self.reset_main_path()
-            #     return "I see you want to do something different... What do you want to do right now then?"
-            self._update_current_state()
-            outline = next(self._path_iterator)
+            if detected_intent is IntentEnum.HELP:
+                outline = self._current_state.generate_suggestions_outline()
+            else:
+                self._update_current_state()
+                outline = next(self._path_iterator)
+
             response = self.nlg.rewrite_outline(outline, user_message=self._current_message)
             self._last_system_response_outline = outline
             self._last_system_response = response

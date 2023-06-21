@@ -35,6 +35,8 @@ class DatabaseBridge:
             matching_title = min(score_results, key=lambda x: -x[0])
             if matching_title[0] >= matching_title_threshold:
                 filters.append(Movie.title == matching_title[1])
+            else:
+                return []
 
         if genre is not None:
             filters.append(func.lower(Movie.genre) == genre.lower())

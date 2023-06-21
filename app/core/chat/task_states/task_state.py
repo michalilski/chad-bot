@@ -1,6 +1,8 @@
 from abc import abstractmethod
 from typing import Dict, List, Union
 
+import pandas as pd
+
 from app.core.chat.dialogue_structs.intent import IntentEnum
 from app.core.chat.dialogue_structs.slot_mapping import SlotMapping
 from app.core.chat.nlg.nlg import NLG
@@ -50,6 +52,9 @@ class TaskState:
 
     def _get_all_empty_slots(self) -> List[SlotMapping]:
         return [slot for slot in self.slots if slot.is_empty]
+
+    def to_dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame([{"slot": slot.name, "value": slot.value or "Unknown"} for slot in self.slots])
 
 
 class NoSlotsToRequest(Exception):
