@@ -8,15 +8,16 @@ from app.settings import config
 
 
 class ChatGPTBridge:
-    def __init__(self):
+    def __init__(self, temperature=0.5):
         openai.api_key = config["OpenAI"]["api_key"]
+        self.temperature = temperature
 
     def request(self, prompt: str, num_attempts: int = 2) -> str:
         if num_attempts <= 0:
             raise ChatProcessingException
         try:
             return (
-                openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}])
+                openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}], temperature=self.temperature)
                 .choices[0]
                 .message.content
             )

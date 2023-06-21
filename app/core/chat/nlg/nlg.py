@@ -14,7 +14,7 @@ class NLG:
 
     def __init__(self, style: str = "none"):
         self.style: str = style
-        self.gpt_bridge = ChatGPTBridge()
+        self.gpt_bridge = ChatGPTBridge(temperature=0.4)
 
     def rewrite_outline(self, outline: str, user_message: str) -> str:
         gpt_input = self.PROMPTS_WITH_USER_MESSAGE[self.style].format(user_message, outline)

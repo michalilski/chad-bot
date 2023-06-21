@@ -12,6 +12,14 @@ services:
       - chadbot-db
     depends_on:
       - chadbot-db
+    deploy:
+        resources:
+          reservations:
+            devices:
+              - driver: nvidia
+                count: 1
+                capabilities: [gpu]
+
 
   chadbot-db:
     image: mysql:5.7

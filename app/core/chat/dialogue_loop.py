@@ -72,7 +72,9 @@ class DialogueLoop:
         if self._current_intent is IntentEnum.BOOK_TICKETS:
             yield from self._book_ticket_path_gen()
         elif self._current_intent is IntentEnum.SEE_BOOKING:
-            yield from self._see_booking_path_gen()
+            yield from self._see_booking_path_gen(user_wants_to_cancel=False)
+        elif self._current_intent is IntentEnum.CANCEL_BOOKING:
+            yield from self._see_booking_path_gen(user_wants_to_cancel=True)
 
     def _book_ticket_path_gen(self):
         book_ticket_state: BookTicketState = BookTicketState()
@@ -94,7 +96,7 @@ class DialogueLoop:
                 response, ready_to_purchase = book_ticket_state.generate_next_response()
                 yield f"Okay, I won't buy this ticket unless you say so. {response}"
 
-    def _see_booking_path_gen(self):
+    def _see_booking_path_gen(self, user_wants_to_cancel: bool):
         manage_booking_state: ManageBookingState = ManageBookingState()
         self._current_state = manage_booking_state
         self._update_current_state()
@@ -105,4 +107,15 @@ class DialogueLoop:
             if task_completed:
                 break
             yield response
-        yield f"{response} I hope I helped!"
+        if not user_wants_to_cancel:
+            yield f"{response} I hope I helped!"
+        else:
+            yield f"Are you sure you want to cancel your reservation for {response}?"
+            if self._current_intent is IntentEnum.AFFIRMATIVE:
+                canceled_ticket = DatabaseBridge.cancel_ticket(self._current_state["4_digit_pin"].value)
+                if canceled_ticket:
+                    yield f"Sure. I canceled your {canceled_ticket}. I hope I helped."
+                else:
+                    yield f"I'm sorry but I could not cancel your reservation"
+            else:
+                yield f"Sure, I won't cancel you reservation for {response}."
