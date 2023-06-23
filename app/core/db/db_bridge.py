@@ -20,18 +20,17 @@ class DatabaseBridge:
 
     @staticmethod
     def get_screenings(
-        title: Optional[str],
-        genre: Optional[str],
-        date: Optional[str],
-        from_hour: Optional[str],
-        to_hour: Optional[str],
-        possible_movie_titles: Tuple[str, ...],
-        matching_title_threshold: int = 50,
-        query_limit: int = 5,
+            title: Optional[str] = None,
+            genre: Optional[str] = None,
+            date: Optional[str] = None,
+            from_hour: Optional[str] = None,
+            to_hour: Optional[str] = None,
+            matching_title_threshold: int = 50,
+            query_limit: int = 5,
     ) -> List[Show]:
         filters: List[bool] = []
         if title is not None:
-            score_results = [(fuzz.ratio(title, m_title), m_title) for m_title in possible_movie_titles]
+            score_results = [(fuzz.ratio(title, m_title), m_title) for m_title in DatabaseBridge.fetch_movie_titles()]
             matching_title = min(score_results, key=lambda x: -x[0])
             if matching_title[0] >= matching_title_threshold:
                 filters.append(Movie.title == matching_title[1])
@@ -56,8 +55,8 @@ class DatabaseBridge:
         return [show for show in results]
 
     @staticmethod
-    def book_ticket(show: Show) -> Ticket:
-        ticket = Ticket(show_id=show.id, seat_number=13, pin=random.randint(1000, 9999))
+    def book_ticket(show: Show, fix_pin: Optional[int] = None) -> Ticket:
+        ticket = Ticket(show_id=show.id, seat_number=13, pin=fix_pin or random.randint(1000, 9999))
         with Session() as db_session:
             db_session.add(ticket)
             db_session.commit()
@@ -91,3 +90,24 @@ class DatabaseBridge:
             db_session.delete(ticket)
             db_session.commit()
         return ticket
+
+    @staticmethod
+    def setup_example_bookings():
+        with Session() as db_session:
+            for ticket in db_session.query(Ticket):
+                db_session.delete(ticket)
+
+            DatabaseBridge.book_ticket(
+                DatabaseBridge.get_screenings(title="The Evil Within")[0]
+            )
+            DatabaseBridge.book_ticket(
+                DatabaseBridge.get_screenings(date="tomorrow")[0]
+            )
+            DatabaseBridge.book_ticket(
+                DatabaseBridge.get_screenings(date="tomorrow")[1]
+            )
+            DatabaseBridge.book_ticket(
+                DatabaseBridge.get_screenings(date="July 6th")[2]
+            )
+
+            db_session.commit()

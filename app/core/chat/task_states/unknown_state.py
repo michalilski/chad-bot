@@ -15,7 +15,7 @@ class UnknownState(TaskState):
 
     def generate_suggestions_outline(self) -> str:
         return (
-            "Hello I am a cinema chatbot service called TODD. I can help you with"
+            "Hello I am a cinema chatbot and my name is Todd. I can help you with"
             " booking a ticket for a movie you want and you will get a reservation PIN,"
             " if you have a PIN number I can tell you the details or cancel the reservation."
         )

@@ -4,8 +4,8 @@ from pathlib import Path
 import gradio as gr
 import pandas as pd
 import soundfile as sf
-from freezegun import freeze_time
 from TTS.api import TTS
+from freezegun import freeze_time
 
 from app.core.chat import DialogueLoop
 from app.core.chat.dst.dst_module import DSTModule
@@ -14,6 +14,8 @@ from app.core.chat.nlg.nlg import NLG
 from app.core.db.db_bridge import DatabaseBridge
 
 _tts = None
+dialogue_loop: DialogueLoop = None
+INITIAL_TURN = [("Hi!", "Hello, my name is Todd, a cinema bot. How can i help you?")]
 
 
 def get_tts():
@@ -39,20 +41,24 @@ def build_chatbot(nlg: NLG):
             ChatGPTBasedIntentDetectionModule(),
             nlg,
         )
-        return respond("Explain how you can help me.", [])[1]
+        DatabaseBridge.setup_example_bookings()
+        return INITIAL_TURN, get_all_tickets_df()
 
     def get_all_tickets_df():
         return pd.DataFrame.from_records([ticket.to_dict() for ticket in DatabaseBridge.get_all_bookings()])
 
     def text_to_speech_html(text):
-        audio = get_tts().tts(text=text)
-        sf.write(audio_output_path, audio, samplerate=22_050)
+        try:
+            audio = get_tts().tts(text=text)
+            sf.write(audio_output_path, audio, samplerate=22_050)
 
-        with audio_output_path.open("rb") as audio_output_file:
-            audio = base64.b64encode(audio_output_file.read()).decode("utf-8")
+            with audio_output_path.open("rb") as audio_output_file:
+                audio = base64.b64encode(audio_output_file.read()).decode("utf-8")
 
-        audio_player = f'<audio src="data:audio/mpeg;base64,{audio}" controls autoplay></audio>'
-        return audio_player
+            audio_player = f'<audio src="data:audio/mpeg;base64,{audio}" controls autoplay></audio>'
+            return audio_player
+        except:
+            return ""
 
     def get_state():
         return dialogue_loop._current_state.to_dataframe()
@@ -63,7 +69,7 @@ def build_chatbot(nlg: NLG):
         return "", chat_history, get_all_tickets_df(), text_to_speech_html(bot_response), get_state()
 
     setup_loop()
-    chatbot = gr.Chatbot(value=respond("Explain how you can help me.", [])[1])
+    chatbot = gr.Chatbot(value=INITIAL_TURN)
     chatbot.style(height=750)
     msg = gr.Textbox(label="Input")
     clear = gr.Button("Clear")
@@ -88,7 +94,7 @@ def build_chatbot(nlg: NLG):
     )
 
     msg.submit(respond, [msg, chatbot], [msg, chatbot, gr_tickets_table, audio_html, state_table])
-    clear.click(setup_loop, None, chatbot, queue=False)
+    clear.click(setup_loop, None, [chatbot, gr_tickets_table], queue=False)
 
 
 def update_nlg_style(nlg: NLG, nlg_style: str):

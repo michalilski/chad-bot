@@ -2,7 +2,7 @@ import logging
 
 from app.core.chat import ChatGPTBridge
 
-BASE_MESSAGE = 'You are a cinema bot. User said: "{user_message}". Answer this exactly to the user, don\'t make stuff up: ({clues}) {outline} Response:'
+BASE_MESSAGE = 'You are a cinema bot. User said: "{user_message}". Say this exactly to the user, don\'t make stuff up: ({clues}) "{outline}" ### Response:'
 
 
 def get_message_with_clues(clues):
@@ -11,10 +11,10 @@ def get_message_with_clues(clues):
 
 class NLG:
     PROMPTS_WITH_USER_MESSAGE = {
-        "professional": get_message_with_clues("sound professional"),
+        "professional": get_message_with_clues("sound nice"),
         "anime": get_message_with_clues("speak like a flirty anime waifu from a dating sim. refer to user as sempai"),
-        "gen_z": get_message_with_clues("speak in gen z speach. be informal and chilled out."),
-        "shakespear": get_message_with_clues("speak like shakespear"),
+        "gen_z": get_message_with_clues("speak in gen z speach. be very informal."),
+        "shakespear": get_message_with_clues("thou shall speak like shakespear in old english"),
     }
 
     def __init__(self, style: str = "professional"):

@@ -66,7 +66,6 @@ class BookTicketState(TaskState):
                 ),
             ]
         )
-        self.movie_titles: Tuple[str, ...] = DatabaseBridge.fetch_movie_titles()
         self.suggestions_already_made: bool = False
 
     def generate_next_response(self) -> Tuple[str, ReadyToPurchase]:
@@ -117,7 +116,6 @@ class BookTicketState(TaskState):
             date=self["movie_date"].value,
             from_hour=self["from_hour"].value,
             to_hour=self["to_hour"].value,
-            possible_movie_titles=self.movie_titles,
             matching_title_threshold=self.matching_title_threshold,
             query_limit=self.query_limit,
         )

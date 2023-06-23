@@ -13,8 +13,12 @@ class DSTModule:
         "You are a dialogue state tracking tool."
         "Extract exact slot values [{0}] that the User wants."
         'Return results as a JSON. Fill empty or don\'t care slots as "NA".'
+        '###'
         'System: "{1}"'
+        '###'
         'User: "{2}"'
+        '###'
+        'JSON response:'
     )
 
     def __init__(self):
@@ -45,10 +49,11 @@ class ChatGPTResponseProcessor:
     @classmethod
     def parse_to_dictionary(cls, text: str) -> Dict[str, Any]:
         try:
+            logging.warning("text in parsing dict in [DST] " + text)
             text = text[text.index("{") : text.index("}") + 1]
             data: Dict[str, Any] = json.loads(text)
             data = {k: data[k] for k in data if data[k] != "NA"}
-            logging.warn(data)
+            logging.warning(data)
         except json.JSONDecodeError:
             logging.error(f"[DST] Could not parse text: {text} to dictionary type.")
             return {}
